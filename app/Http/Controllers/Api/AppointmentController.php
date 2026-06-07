@@ -24,8 +24,7 @@ class AppointmentController extends Controller
     public function __construct(
         private readonly AvailabilityService $availabilityService,
         private readonly AuditLogger $auditLogger
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -128,15 +127,17 @@ class AppointmentController extends Controller
     {
         $this->ensureAppointmentCanBeModified($appointment);
 
-        $before = $appointment->only(['reason', 'status']);
+        $before = $this->normalizeAppointmentSnapshot($appointment);
 
         $appointment->update($request->validated());
 
-        $after = $appointment->fresh()->only(['reason', 'status']);
+        $appointment->refresh();
+
+        $after = $this->normalizeAppointmentSnapshot($appointment);
 
         $changedFields = collect($before)
             ->filter(function ($oldValue, string $field) use ($after) {
-                return (string) $oldValue !== (string) ($after[$field] ?? null);
+                return $oldValue !== ($after[$field] ?? null);
             })
             ->keys()
             ->values()
@@ -154,7 +155,7 @@ class AppointmentController extends Controller
         );
 
         return response()->json([
-            'data' => new AppointmentResource($appointment->fresh()->load(['doctor.user', 'patient'])),
+            'data' => new AppointmentResource($appointment->load(['doctor.user', 'patient'])),
         ]);
     }
 
@@ -181,6 +182,8 @@ class AppointmentController extends Controller
             'data' => new AppointmentResource($appointment->fresh()->load(['doctor.user', 'patient'])),
         ]);
     }
+
+
 
     public function cancel(CancelAppointmentRequest $request, Appointment $appointment)
     {
@@ -239,29 +242,35 @@ class AppointmentController extends Controller
         ]);
     }
 
-    public function markNoShow(Request $request, Appointment $appointment)
-    {
-        $this->authorize('markNoShow', $appointment);
-        $this->ensureAppointmentCanBeModified($appointment);
+public function markNoShow(Request $request, Appointment $appointment)
+{
+    $this->authorize('markNoShow', $appointment);
+    $this->ensureAppointmentCanBeModified($appointment);
 
-        $appointment->update([
-            'status' => AppointmentStatus::NoShow,
-        ]);
-
-        $this->auditLogger->log(
-            actor: $request->user(),
-            action: AuditAction::AppointmentNoShowMarked,
-            auditable: $appointment,
-            metadata: [
-                'appointment_id' => $appointment->id,
-            ],
-            request: $request
-        );
-
-        return response()->json([
-            'data' => new AppointmentResource($appointment->fresh()->load(['doctor.user', 'patient'])),
+    if ($appointment->starts_at->isFuture()) {
+        throw ValidationException::withMessages([
+            'appointment' => ['You cannot mark a future appointment as no-show.'],
         ]);
     }
+
+    $appointment->update([
+        'status' => AppointmentStatus::NoShow,
+    ]);
+
+    $this->auditLogger->log(
+        actor: $request->user(),
+        action: AuditAction::AppointmentNoShowMarked,
+        auditable: $appointment,
+        metadata: [
+            'appointment_id' => $appointment->id,
+        ],
+        request: $request
+    );
+
+    return response()->json([
+        'data' => new AppointmentResource($appointment->fresh()->load(['doctor.user', 'patient'])),
+    ]);
+}
 
     public function reschedule(RescheduleAppointmentRequest $request, Appointment $appointment)
     {
@@ -323,4 +332,12 @@ class AppointmentController extends Controller
             ]);
         }
     }
+
+    private function normalizeAppointmentSnapshot(Appointment $appointment): array
+{
+    return [
+        'reason' => $appointment->reason,
+        'status' => $appointment->status?->value,
+    ];
+}
 }
