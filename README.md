@@ -1,59 +1,171 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# KlinikLedger / PraxisFlow
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+KlinikLedger is a Laravel backend API portfolio project for healthcare practice operations.
 
-## About Laravel
+The project simulates the backend workflows of a small medical practice: authentication, clinic-scoped users, doctors, patients, appointments, availability rules, treatment notes, invoices, audit logs, consents, and GDPR-inspired patient privacy operations.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+> This is a backend engineering portfolio project. It is not a certified medical product, not a real electronic health record system, and not intended for production healthcare use. Privacy features are GDPR-inspired and implemented for demonstration purposes only.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Project Goals
 
-## Learning Laravel
+This project was built to demonstrate production-oriented backend skills:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- REST API design with Laravel
+- Laravel Sanctum authentication
+- Role-based authorization with Policies
+- Multi-tenant clinic data isolation
+- Appointment scheduling business rules
+- Audit logging for sensitive operations
+- Billing workflows with invoice items and totals
+- Patient consent tracking
+- GDPR-inspired patient export and anonymization
+- Feature tests for critical business rules
+- Clean, maintainable Laravel architecture
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Tech Stack
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- PHP 8.2+
+- Laravel 12
+- Laravel Sanctum
+- MySQL
+- PHPUnit / Laravel Feature Tests
+- Eloquent ORM
+- Laravel Form Requests
+- Laravel API Resources
+- Laravel Policies
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Main Features
 
-## Contributing
+### Authentication & Users
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- Register a clinic owner
+- Login/logout with Sanctum tokens
+- Get current authenticated user
+- Manage clinic users
+- Role-based access control:
+  - `owner_clinic`
+  - `doctor`
+  - `receptionist`
 
-## Code of Conduct
+### Clinic Scoping
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+All sensitive records are scoped by `clinic_id`.
 
-## Security Vulnerabilities
+Users from one clinic cannot access another clinic's doctors, patients, appointments, invoices, consents, exports, or audit logs.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Doctors
 
-## License
+- Manage doctor profiles
+- Link doctor profile to a user account
+- Store specialization and appointment duration
+- Support active/inactive doctors
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Patients
+
+- Manage clinic patients
+- Restrict doctor access to patients linked to their appointments
+- Support privacy operations such as export and anonymization
+
+### Working Hours & Availability
+
+- Define doctor working hours
+- Add doctor time off
+- Reject appointments outside working hours
+- Reject appointments during time off
+- Prevent double booking
+
+### Appointments
+
+Supported appointment lifecycle:
+
+- `scheduled`
+- `confirmed`
+- `completed`
+- `cancelled`
+- `no_show`
+
+Business rules include:
+
+- Confirm appointments
+- Cancel appointments with reason
+- Complete past appointments
+- Prevent completing future appointments
+- Mark past appointments as no-show
+- Prevent future no-show marking
+- Reschedule appointments
+- Prevent rescheduling cancelled appointments
+- Audit lifecycle changes
+
+### Treatment Notes
+
+- Doctors can create treatment notes for their own appointments
+- Receptionists cannot view treatment notes
+- Clinic owners can view selected notes only when visibility allows it
+- Treatment note reads and changes are audit logged
+
+### Invoices
+
+- Create invoices with invoice items
+- Calculate subtotal, tax, and total
+- Issue invoices
+- Mark issued invoices as paid
+- Cancel invoices
+- Prevent updating paid invoices
+- Prevent doctors from accessing invoices
+
+### Consents
+
+- Track patient consents
+- Withdraw consents
+- Automatically withdraw previous active consent of the same type when a new one is granted
+- Prevent doctors from managing consents
+- Audit consent changes
+
+### Patient Export
+
+- Generate JSON export of patient data
+- Includes:
+  - Patient profile
+  - Appointments
+  - Invoices and invoice items
+  - Consents
+- Restricted to owner/receptionist
+- Audit logged
+
+### Patient Anonymization
+
+- Owner-only privacy operation
+- Replaces personal data without breaking relational records
+- Keeps appointments, invoices, consents, and audit logs linked
+- Prevents anonymizing an already anonymized patient
+
+### Audit Logs
+
+Sensitive actions are recorded through audit logs, including:
+
+- Viewing sensitive patient-related data
+- Appointment lifecycle changes
+- Treatment note operations
+- Invoice operations
+- Consent operations
+- Patient export
+- Patient anonymization
+
+Only clinic owners can view audit logs.
+
+---
+
+## Demo Data
+
+The project includes a demo seeder.
+
+Run:
+
+```bash
+php artisan migrate:fresh --seed
