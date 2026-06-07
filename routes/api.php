@@ -9,7 +9,11 @@ use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\DoctorTimeOffController;
 use App\Http\Controllers\Api\DoctorWorkingHourController;
 use App\Http\Controllers\Api\PatientController;
+use App\Http\Controllers\Api\ConsentController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\PatientExportController;
+use App\Http\Controllers\Api\TreatmentNoteController;
+use App\Http\Controllers\Api\InvoiceController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -46,7 +50,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/appointments/{appointment}/complete', [AppointmentController::class, 'complete']);
     Route::post('/appointments/{appointment}/no-show', [AppointmentController::class, 'markNoShow']);
     Route::post('/appointments/{appointment}/reschedule', [AppointmentController::class, 'reschedule']);
+    Route::get('/appointments/{appointment}/notes', [TreatmentNoteController::class, 'index']);
+    Route::post('/appointments/{appointment}/notes', [TreatmentNoteController::class, 'store']);
+
+    Route::apiResource('treatment-notes', TreatmentNoteController::class)
+        ->except(['index', 'store']);
 
     Route::apiResource('audit-logs', AuditLogController::class)
         ->only(['index', 'show']);
+
+    Route::apiResource('invoices', InvoiceController::class)
+        ->only(['index', 'store', 'show', 'update']);
+
+    Route::post('/invoices/{invoice}/issue', [InvoiceController::class, 'issue']);
+    Route::post('/invoices/{invoice}/mark-paid', [InvoiceController::class, 'markPaid']);
+    Route::post('/invoices/{invoice}/cancel', [InvoiceController::class, 'cancel']);
+
+    Route::get('/patients/{patient}/consents', [ConsentController::class, 'index']);
+    Route::post('/patients/{patient}/consents', [ConsentController::class, 'store']);
+    Route::post('/consents/{consent}/withdraw', [ConsentController::class, 'withdraw']);
+
+    Route::post('/patients/{patient}/export-request', [PatientExportController::class, 'store']);
+    Route::get('/patient-exports/{patientExport}', [PatientExportController::class, 'show']);
 });

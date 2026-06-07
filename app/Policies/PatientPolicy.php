@@ -66,4 +66,13 @@ class PatientPolicy
                 UserRole::Receptionist,
             ], true);
     }
+
+    public function export(User $user, Patient $patient): bool
+    {
+        return $user->clinic_id === $patient->clinic_id
+            && in_array($user->role, [
+                UserRole::OwnerClinic,
+                UserRole::Receptionist,
+            ], true);
+    }
 }

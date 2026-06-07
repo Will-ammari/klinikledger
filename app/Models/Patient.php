@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+
 class Patient extends Model
 {
     use HasFactory;
@@ -54,5 +55,25 @@ class Patient extends Model
     public function isAnonymized(): bool
     {
         return $this->anonymized_at !== null;
+    }
+
+    public function treatmentNotes(): HasMany
+    {
+        return $this->hasMany(TreatmentNote::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function consents(): HasMany
+    {
+        return $this->hasMany(Consent::class);
+    }
+
+    public function exports(): HasMany
+    {
+        return $this->hasMany(PatientExport::class);
     }
 }

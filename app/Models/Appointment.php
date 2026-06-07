@@ -6,6 +6,7 @@ use App\Enums\AppointmentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Appointment extends Model
 {
@@ -57,5 +58,15 @@ class Appointment extends Model
     public function isCompleted(): bool
     {
         return $this->status === AppointmentStatus::Completed;
+    }
+
+    public function treatmentNote(): HasOne
+    {
+        return $this->hasOne(TreatmentNote::class);
+    }
+
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class);
     }
 }

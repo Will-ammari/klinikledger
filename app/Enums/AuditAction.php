@@ -32,4 +32,22 @@ enum AuditAction: string
     case AppointmentCompleted = 'appointment.completed';
     case AppointmentNoShowMarked = 'appointment.no_show_marked';
     case AppointmentRescheduled = 'appointment.rescheduled';
+
+    case TreatmentNoteCreated = 'treatment_note.created';
+    case TreatmentNoteViewed = 'treatment_note.viewed';
+    case TreatmentNoteUpdated = 'treatment_note.updated';
+    case TreatmentNoteDeleted = 'treatment_note.deleted';
+
+    case InvoiceCreated = 'invoice.created';
+    case InvoiceViewed = 'invoice.viewed';
+    case InvoiceUpdated = 'invoice.updated';
+    case InvoiceIssued = 'invoice.issued';
+    case InvoiceMarkedPaid = 'invoice.marked_paid';
+    case InvoiceCancelled = 'invoice.cancelled';
+
+    case ConsentCreated = 'consent.created';
+    case ConsentViewed = 'consent.viewed';
+    case ConsentWithdrawn = 'consent.withdrawn';
+    case PatientExportRequested = 'patient_export.requested';
+    case PatientExportViewed = 'patient_export.viewed';
 }
