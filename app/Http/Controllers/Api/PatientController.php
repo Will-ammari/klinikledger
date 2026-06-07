@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
 use App\Http\Resources\PatientResource;
+use App\Services\Privacy\PatientAnonymizer;
 use App\Models\Patient;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Http\Request;
@@ -16,9 +17,9 @@ use Illuminate\Http\Request;
 class PatientController extends Controller
 {
     public function __construct(
-        private readonly AuditLogger $auditLogger
-    ) {
-    }
+        private readonly AuditLogger $auditLogger,
+        private readonly PatientAnonymizer $patientAnonymizer
+    ) {}
 
     public function index(Request $request)
     {
@@ -168,6 +169,30 @@ class PatientController extends Controller
 
         return response()->json([
             'message' => 'Patient deleted successfully.',
+        ]);
+    }
+
+    public function anonymize(Request $request, Patient $patient)
+    {
+        $this->authorize('anonymize', $patient);
+
+        $originalPatientId = $patient->id;
+
+        $patient = $this->patientAnonymizer->anonymize($patient);
+
+        $this->auditLogger->log(
+            actor: $request->user(),
+            action: AuditAction::PatientAnonymized,
+            auditable: $patient,
+            metadata: [
+                'patient_id' => $originalPatientId,
+                'anonymized_at' => $patient->anonymized_at?->toISOString(),
+            ],
+            request: $request
+        );
+
+        return response()->json([
+            'data' => new PatientResource($patient),
         ]);
     }
 }

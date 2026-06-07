@@ -41,7 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/doctors/{doctor}/available-slots', AvailableSlotController::class);
 
     Route::apiResource('patients', PatientController::class);
-
+    Route::post('/patients/{patient}/anonymize', [PatientController::class, 'anonymize']);
     Route::apiResource('appointments', AppointmentController::class)
         ->except(['destroy']);
 

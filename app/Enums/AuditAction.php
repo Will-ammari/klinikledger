@@ -50,4 +50,5 @@ enum AuditAction: string
     case ConsentWithdrawn = 'consent.withdrawn';
     case PatientExportRequested = 'patient_export.requested';
     case PatientExportViewed = 'patient_export.viewed';
+    case PatientAnonymized = 'patient.anonymized';
 }

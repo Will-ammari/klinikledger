@@ -75,4 +75,13 @@ class PatientPolicy
                 UserRole::Receptionist,
             ], true);
     }
+
+    public function anonymize(User $user, Patient $patient): bool
+    {
+        return $user->clinic_id === $patient->clinic_id
+            && ! $patient->isAnonymized()
+            && in_array($user->role, [
+                UserRole::OwnerClinic,
+            ], true);
+    }
 }
