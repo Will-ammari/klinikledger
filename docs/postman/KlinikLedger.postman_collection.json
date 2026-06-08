@@ -1,0 +1,1731 @@
+{
+"info": {
+"name": "KlinikLedger / PraxisFlow API",
+"description": "Postman collection for the KlinikLedger / PraxisFlow Laravel REST API portfolio project. It covers authentication, clinic-scoped resources, doctors, patients, appointments, treatment notes, invoices, consents, patient exports, anonymization, and audit logs.",
+"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+},
+"variable": [
+{
+"key": "baseUrl",
+"value": "http://127.0.0.1:8000/api",
+"type": "string"
+},
+{
+"key": "token",
+"value": "",
+"type": "string"
+},
+{
+"key": "ownerEmail",
+"value": "[owner@example.com](mailto:owner@example.com)",
+"type": "string"
+},
+{
+"key": "receptionistEmail",
+"value": "[receptionist@example.com](mailto:receptionist@example.com)",
+"type": "string"
+},
+{
+"key": "doctorEmail",
+"value": "[doctor@example.com](mailto:doctor@example.com)",
+"type": "string"
+},
+{
+"key": "password",
+"value": "password",
+"type": "string"
+},
+{
+"key": "clinicId",
+"value": "1",
+"type": "string"
+},
+{
+"key": "userId",
+"value": "1",
+"type": "string"
+},
+{
+"key": "doctorId",
+"value": "1",
+"type": "string"
+},
+{
+"key": "patientId",
+"value": "1",
+"type": "string"
+},
+{
+"key": "appointmentId",
+"value": "1",
+"type": "string"
+},
+{
+"key": "treatmentNoteId",
+"value": "1",
+"type": "string"
+},
+{
+"key": "invoiceId",
+"value": "1",
+"type": "string"
+},
+{
+"key": "consentId",
+"value": "1",
+"type": "string"
+},
+{
+"key": "patientExportId",
+"value": "1",
+"type": "string"
+},
+{
+"key": "auditLogId",
+"value": "1",
+"type": "string"
+},
+{
+"key": "date",
+"value": "2026-08-15",
+"type": "string"
+}
+],
+"auth": {
+"type": "bearer",
+"bearer": [
+{
+"key": "token",
+"value": "{{token}}",
+"type": "string"
+}
+]
+},
+"item": [
+{
+"name": "Auth",
+"item": [
+{
+"name": "Register Clinic Owner",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"auth": {
+"type": "noauth"
+},
+"body": {
+"mode": "raw",
+"raw": "{\n  "clinic_name": "Demo Praxis Berlin",\n  "name": "Demo Owner",\n  "email": "[new-owner@example.com](mailto:new-owner@example.com)",\n  "password": "password",\n  "password_confirmation": "password"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/auth/register",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"auth",
+"register"
+]
+},
+"description": "Register a new clinic owner and clinic."
+}
+},
+{
+"name": "Login as Owner",
+"event": [
+{
+"listen": "test",
+"script": {
+"type": "text/javascript",
+"exec": [
+"let json = {};",
+"try { json = pm.response.json(); } catch (e) {}",
+"const token = json.token || json.access_token || (json.data && (json.data.token || json.data.access_token));",
+"if (token) {",
+"  pm.collectionVariables.set('token', token);",
+"}"
+]
+}
+}
+],
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"auth": {
+"type": "noauth"
+},
+"body": {
+"mode": "raw",
+"raw": "{\n  "email": "{{ownerEmail}}",\n  "password": "{{password}}"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/auth/login",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"auth",
+"login"
+]
+},
+"description": "Login with the seeded owner account. If the API response contains token or access_token, it is saved automatically into the collection token variable."
+}
+},
+{
+"name": "Login as Receptionist",
+"event": [
+{
+"listen": "test",
+"script": {
+"type": "text/javascript",
+"exec": [
+"let json = {};",
+"try { json = pm.response.json(); } catch (e) {}",
+"const token = json.token || json.access_token || (json.data && (json.data.token || json.data.access_token));",
+"if (token) {",
+"  pm.collectionVariables.set('token', token);",
+"}"
+]
+}
+}
+],
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"auth": {
+"type": "noauth"
+},
+"body": {
+"mode": "raw",
+"raw": "{\n  "email": "{{receptionistEmail}}",\n  "password": "{{password}}"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/auth/login",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"auth",
+"login"
+]
+},
+"description": "Login with the seeded receptionist account."
+}
+},
+{
+"name": "Login as Doctor",
+"event": [
+{
+"listen": "test",
+"script": {
+"type": "text/javascript",
+"exec": [
+"let json = {};",
+"try { json = pm.response.json(); } catch (e) {}",
+"const token = json.token || json.access_token || (json.data && (json.data.token || json.data.access_token));",
+"if (token) {",
+"  pm.collectionVariables.set('token', token);",
+"}"
+]
+}
+}
+],
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"auth": {
+"type": "noauth"
+},
+"body": {
+"mode": "raw",
+"raw": "{\n  "email": "{{doctorEmail}}",\n  "password": "{{password}}"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/auth/login",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"auth",
+"login"
+]
+},
+"description": "Login with the seeded doctor account."
+}
+},
+{
+"name": "Me",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/me",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"me"
+]
+},
+"description": "Return the authenticated user."
+}
+},
+{
+"name": "Logout",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/auth/logout",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"auth",
+"logout"
+]
+},
+"description": "Revoke the current Sanctum token."
+}
+}
+]
+},
+{
+"name": "Clinic",
+"item": [
+{
+"name": "Get Current Clinic",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/clinics/current",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"clinics",
+"current"
+]
+}
+}
+},
+{
+"name": "Update Current Clinic",
+"request": {
+"method": "PATCH",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "name": "Berlin Family Praxis",\n  "email": "[contact@berlin-family-praxis.test](mailto:contact@berlin-family-praxis.test)",\n  "phone": "+49 30 123456",\n  "address": "Demo Street 1",\n  "city": "Berlin",\n  "country": "Germany",\n  "timezone": "Europe/Berlin"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/clinics/current",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"clinics",
+"current"
+]
+}
+}
+}
+]
+},
+{
+"name": "Users",
+"item": [
+{
+"name": "List Users",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/users",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"users"
+]
+}
+}
+},
+{
+"name": "Create User",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "name": "Demo Staff Member",\n  "email": "[staff@example.com](mailto:staff@example.com)",\n  "password": "password",\n  "password_confirmation": "password",\n  "role": "receptionist",\n  "status": "active"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/users",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"users"
+]
+}
+}
+},
+{
+"name": "Show User",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/users/{{userId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"users",
+"{{userId}}"
+]
+}
+}
+},
+{
+"name": "Update User",
+"request": {
+"method": "PATCH",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "name": "Updated Staff Member",\n  "status": "active"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/users/{{userId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"users",
+"{{userId}}"
+]
+}
+}
+},
+{
+"name": "Change User Role",
+"request": {
+"method": "PATCH",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "role": "receptionist"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/users/{{userId}}/role",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"users",
+"{{userId}}",
+"role"
+]
+}
+}
+},
+{
+"name": "Delete User",
+"request": {
+"method": "DELETE",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/users/{{userId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"users",
+"{{userId}}"
+]
+}
+}
+}
+]
+},
+{
+"name": "Doctors",
+"item": [
+{
+"name": "List Doctors",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/doctors",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"doctors"
+]
+}
+}
+},
+{
+"name": "Create Doctor",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "user_id": null,\n  "specialization": "General Medicine",\n  "appointment_duration_minutes": 30,\n  "is_active": true\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/doctors",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"doctors"
+]
+}
+}
+},
+{
+"name": "Show Doctor",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/doctors/{{doctorId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"doctors",
+"{{doctorId}}"
+]
+}
+}
+},
+{
+"name": "Update Doctor",
+"request": {
+"method": "PATCH",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "specialization": "Family Medicine",\n  "appointment_duration_minutes": 30,\n  "is_active": true\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/doctors/{{doctorId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"doctors",
+"{{doctorId}}"
+]
+}
+}
+},
+{
+"name": "Delete Doctor",
+"request": {
+"method": "DELETE",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/doctors/{{doctorId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"doctors",
+"{{doctorId}}"
+]
+}
+}
+}
+]
+},
+{
+"name": "Availability",
+"item": [
+{
+"name": "List Working Hours",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/doctors/{{doctorId}}/working-hours",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"doctors",
+"{{doctorId}}",
+"working-hours"
+]
+}
+}
+},
+{
+"name": "Replace Working Hours",
+"request": {
+"method": "PUT",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "working_hours": [\n    {\n      "weekday": 1,\n      "starts_at": "09:00",\n      "ends_at": "17:00"\n    },\n    {\n      "weekday": 2,\n      "starts_at": "09:00",\n      "ends_at": "17:00"\n    },\n    {\n      "weekday": 3,\n      "starts_at": "09:00",\n      "ends_at": "17:00"\n    },\n    {\n      "weekday": 4,\n      "starts_at": "09:00",\n      "ends_at": "17:00"\n    },\n    {\n      "weekday": 5,\n      "starts_at": "09:00",\n      "ends_at": "14:00"\n    }\n  ]\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/doctors/{{doctorId}}/working-hours",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"doctors",
+"{{doctorId}}",
+"working-hours"
+]
+}
+}
+},
+{
+"name": "List Time Offs",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/doctors/{{doctorId}}/time-offs",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"doctors",
+"{{doctorId}}",
+"time-offs"
+]
+}
+}
+},
+{
+"name": "Create Time Off",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "starts_at": "2026-08-15T12:00:00",\n  "ends_at": "2026-08-15T13:00:00",\n  "reason": "Lunch break"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/doctors/{{doctorId}}/time-offs",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"doctors",
+"{{doctorId}}",
+"time-offs"
+]
+}
+}
+},
+{
+"name": "Delete Time Off",
+"request": {
+"method": "DELETE",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/doctors/{{doctorId}}/time-offs/1",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"doctors",
+"{{doctorId}}",
+"time-offs",
+"1"
+]
+}
+}
+},
+{
+"name": "Available Slots",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/doctors/{{doctorId}}/available-slots?date={{date}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"doctors",
+"{{doctorId}}",
+"available-slots"
+],
+"query": [
+{
+"key": "date",
+"value": "{{date}}"
+}
+]
+}
+}
+}
+]
+},
+{
+"name": "Patients",
+"item": [
+{
+"name": "List Patients",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/patients",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"patients"
+]
+}
+}
+},
+{
+"name": "Create Patient",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "first_name": "Max",\n  "last_name": "Mustermann",\n  "email": "[max.mustermann@example.com](mailto:max.mustermann@example.com)",\n  "phone": "+49 30 987654",\n  "date_of_birth": "1990-01-15",\n  "status": "active"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/patients",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"patients"
+]
+}
+}
+},
+{
+"name": "Show Patient",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/patients/{{patientId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"patients",
+"{{patientId}}"
+]
+}
+}
+},
+{
+"name": "Update Patient",
+"request": {
+"method": "PATCH",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "first_name": "Max",\n  "last_name": "Mustermann",\n  "phone": "+49 30 111222",\n  "status": "active"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/patients/{{patientId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"patients",
+"{{patientId}}"
+]
+}
+}
+},
+{
+"name": "Delete Patient",
+"request": {
+"method": "DELETE",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/patients/{{patientId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"patients",
+"{{patientId}}"
+]
+}
+}
+},
+{
+"name": "Anonymize Patient",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/patients/{{patientId}}/anonymize",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"patients",
+"{{patientId}}",
+"anonymize"
+]
+}
+}
+}
+]
+},
+{
+"name": "Appointments",
+"item": [
+{
+"name": "List Appointments",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/appointments",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"appointments"
+]
+}
+}
+},
+{
+"name": "Create Appointment",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "doctor_id": {{doctorId}},\n  "patient_id": {{patientId}},\n  "starts_at": "2026-08-15T09:30:00",\n  "ends_at": "2026-08-15T10:00:00",\n  "reason": "Initial consultation"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/appointments",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"appointments"
+]
+}
+}
+},
+{
+"name": "Show Appointment",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/appointments/{{appointmentId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"appointments",
+"{{appointmentId}}"
+]
+}
+}
+},
+{
+"name": "Update Appointment",
+"request": {
+"method": "PATCH",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "reason": "Updated consultation reason"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/appointments/{{appointmentId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"appointments",
+"{{appointmentId}}"
+]
+}
+}
+},
+{
+"name": "Confirm Appointment",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/appointments/{{appointmentId}}/confirm",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"appointments",
+"{{appointmentId}}",
+"confirm"
+]
+}
+}
+},
+{
+"name": "Cancel Appointment",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "reason": "Patient requested cancellation"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/appointments/{{appointmentId}}/cancel",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"appointments",
+"{{appointmentId}}",
+"cancel"
+]
+}
+}
+},
+{
+"name": "Complete Appointment",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/appointments/{{appointmentId}}/complete",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"appointments",
+"{{appointmentId}}",
+"complete"
+]
+}
+}
+},
+{
+"name": "Mark Appointment No-show",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/appointments/{{appointmentId}}/no-show",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"appointments",
+"{{appointmentId}}",
+"no-show"
+]
+}
+}
+},
+{
+"name": "Reschedule Appointment",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "starts_at": "2026-08-15T10:30:00",\n  "ends_at": "2026-08-15T11:00:00"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/appointments/{{appointmentId}}/reschedule",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"appointments",
+"{{appointmentId}}",
+"reschedule"
+]
+}
+}
+}
+]
+},
+{
+"name": "Treatment Notes",
+"item": [
+{
+"name": "List Appointment Notes",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/appointments/{{appointmentId}}/notes",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"appointments",
+"{{appointmentId}}",
+"notes"
+]
+}
+}
+},
+{
+"name": "Create Treatment Note",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "subjective": "Patient reports recurring headache.",\n  "objective": "No acute distress observed.",\n  "assessment": "Likely tension headache.",\n  "plan": "Hydration, rest, follow-up if symptoms continue.",\n  "visibility": "doctor_only"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/appointments/{{appointmentId}}/notes",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"appointments",
+"{{appointmentId}}",
+"notes"
+]
+}
+}
+},
+{
+"name": "Show Treatment Note",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/treatment-notes/{{treatmentNoteId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"treatment-notes",
+"{{treatmentNoteId}}"
+]
+}
+}
+},
+{
+"name": "Update Treatment Note",
+"request": {
+"method": "PATCH",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "subjective": "Updated subjective note.",\n  "objective": "Updated objective note.",\n  "assessment": "Updated assessment.",\n  "plan": "Updated plan.",\n  "visibility": "doctor_only"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/treatment-notes/{{treatmentNoteId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"treatment-notes",
+"{{treatmentNoteId}}"
+]
+}
+}
+},
+{
+"name": "Delete Treatment Note",
+"request": {
+"method": "DELETE",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/treatment-notes/{{treatmentNoteId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"treatment-notes",
+"{{treatmentNoteId}}"
+]
+}
+}
+}
+]
+},
+{
+"name": "Invoices",
+"item": [
+{
+"name": "List Invoices",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/invoices",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"invoices"
+]
+}
+}
+},
+{
+"name": "Create Invoice",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "patient_id": {{patientId}},\n  "appointment_id": {{appointmentId}},\n  "tax_rate": 19,\n  "items": [\n    {\n      "description": "Initial consultation",\n      "quantity": 1,\n      "unit_price": 100\n    }\n  ]\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/invoices",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"invoices"
+]
+}
+}
+},
+{
+"name": "Show Invoice",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/invoices/{{invoiceId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"invoices",
+"{{invoiceId}}"
+]
+}
+}
+},
+{
+"name": "Update Invoice",
+"request": {
+"method": "PATCH",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "tax_rate": 19,\n  "items": [\n    {\n      "description": "Updated consultation",\n      "quantity": 1,\n      "unit_price": 120\n    }\n  ]\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/invoices/{{invoiceId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"invoices",
+"{{invoiceId}}"
+]
+}
+}
+},
+{
+"name": "Issue Invoice",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/invoices/{{invoiceId}}/issue",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"invoices",
+"{{invoiceId}}",
+"issue"
+]
+}
+}
+},
+{
+"name": "Mark Invoice Paid",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/invoices/{{invoiceId}}/mark-paid",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"invoices",
+"{{invoiceId}}",
+"mark-paid"
+]
+}
+}
+},
+{
+"name": "Cancel Invoice",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/invoices/{{invoiceId}}/cancel",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"invoices",
+"{{invoiceId}}",
+"cancel"
+]
+}
+}
+}
+]
+},
+{
+"name": "Consents",
+"item": [
+{
+"name": "List Patient Consents",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/patients/{{patientId}}/consents",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"patients",
+"{{patientId}}",
+"consents"
+]
+}
+}
+},
+{
+"name": "Create Patient Consent",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+},
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  "type": "email_reminders",\n  "status": "granted",\n  "source": "reception_desk"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/patients/{{patientId}}/consents",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"patients",
+"{{patientId}}",
+"consents"
+]
+}
+}
+},
+{
+"name": "Withdraw Consent",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/consents/{{consentId}}/withdraw",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"consents",
+"{{consentId}}",
+"withdraw"
+]
+}
+}
+}
+]
+},
+{
+"name": "Patient Exports",
+"item": [
+{
+"name": "Create Patient Export",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/patients/{{patientId}}/export-request",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"patients",
+"{{patientId}}",
+"export-request"
+]
+}
+}
+},
+{
+"name": "Show Patient Export",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/patient-exports/{{patientExportId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"patient-exports",
+"{{patientExportId}}"
+]
+}
+}
+}
+]
+},
+{
+"name": "Audit Logs",
+"item": [
+{
+"name": "List Audit Logs",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/audit-logs",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"audit-logs"
+]
+}
+}
+},
+{
+"name": "Show Audit Log",
+"request": {
+"method": "GET",
+"header": [
+{
+"key": "Accept",
+"value": "application/json"
+}
+],
+"url": {
+"raw": "{{baseUrl}}/audit-logs/{{auditLogId}}",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"audit-logs",
+"{{auditLogId}}"
+]
+}
+}
+}
+]
+}
+]
+}

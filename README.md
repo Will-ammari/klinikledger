@@ -321,6 +321,7 @@ Main endpoint groups:
 
 More endpoint details are documented in [`docs/api.md`](docs/api.md).
 
+A Postman collection is available at [`docs/postman/KlinikLedger.postman_collection.json`](docs/postman/KlinikLedger.postman_collection.json).
 ---
 
 ## Example API flow
