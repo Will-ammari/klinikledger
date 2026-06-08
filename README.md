@@ -1,5 +1,7 @@
 # KlinikLedger / PraxisFlow
 
+![Tests](https://github.com/Will-ammari/klinikledger/actions/workflows/tests.yml/badge.svg)
+
 KlinikLedger, also referred to as PraxisFlow in the project specification, is a Laravel REST API portfolio project for healthcare practice operations.
 
 It simulates the backend workflows of a small clinic: authentication, clinic-scoped users, doctors, patients, appointment scheduling, availability rules, treatment notes, invoices, audit logs, consents, and GDPR-inspired patient privacy operations.
