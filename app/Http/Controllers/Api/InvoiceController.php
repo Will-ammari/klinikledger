@@ -20,8 +20,7 @@ class InvoiceController extends Controller
     public function __construct(
         private readonly AuditLogger $auditLogger,
         private readonly InvoiceCalculator $calculator
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {

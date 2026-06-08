@@ -35,6 +35,7 @@ class UpdateInvoiceRequest extends FormRequest
             function (Validator $validator) {
                 if (empty($this->validated())) {
                     $validator->errors()->add('invoice', 'At least one field must be provided for update.');
+
                     return;
                 }
 
@@ -47,6 +48,7 @@ class UpdateInvoiceRequest extends FormRequest
 
                 if (! $patient) {
                     $validator->errors()->add('patient_id', 'The selected patient does not belong to your clinic.');
+
                     return;
                 }
 

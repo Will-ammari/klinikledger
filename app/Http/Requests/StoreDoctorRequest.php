@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Doctor;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -10,7 +11,7 @@ class StoreDoctorRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('create', \App\Models\Doctor::class);
+        return $this->user()->can('create', Doctor::class);
     }
 
     public function rules(): array

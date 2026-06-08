@@ -6,6 +6,7 @@ use App\Enums\AppointmentStatus;
 use App\Models\Clinic;
 use App\Models\Doctor;
 use App\Models\Patient;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AppointmentFactory extends Factory
@@ -42,7 +43,7 @@ class AppointmentFactory extends Factory
     {
         return $this->state(fn () => [
             'starts_at' => $startsAt,
-            'ends_at' => \Carbon\Carbon::parse($startsAt)->addMinutes($durationMinutes),
+            'ends_at' => Carbon::parse($startsAt)->addMinutes($durationMinutes),
         ]);
     }
 

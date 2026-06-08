@@ -72,7 +72,7 @@ class PatientDoctorAccessTest extends TestCase
 
         Sanctum::actingAs($doctorUser);
 
-        $this->getJson('/api/patients/' . $unlinkedPatient->id)
+        $this->getJson('/api/patients/'.$unlinkedPatient->id)
             ->assertForbidden();
     }
 

@@ -5,15 +5,15 @@ use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AvailableSlotController;
 use App\Http\Controllers\Api\ClinicController;
+use App\Http\Controllers\Api\ConsentController;
 use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\DoctorTimeOffController;
 use App\Http\Controllers\Api\DoctorWorkingHourController;
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\PatientController;
-use App\Http\Controllers\Api\ConsentController;
-use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\PatientExportController;
 use App\Http\Controllers\Api\TreatmentNoteController;
-use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [AuthController::class, 'register']);

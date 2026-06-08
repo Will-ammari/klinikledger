@@ -2,10 +2,10 @@
 
 namespace App\Policies;
 
+use App\Enums\InvoiceStatus;
 use App\Enums\UserRole;
 use App\Models\Invoice;
 use App\Models\User;
-use App\Enums\InvoiceStatus;
 
 class InvoicePolicy
 {
@@ -49,15 +49,15 @@ class InvoicePolicy
         return $this->update($user, $invoice);
     }
 
-public function markPaid(User $user, Invoice $invoice): bool
-{
-    return $user->clinic_id === $invoice->clinic_id
-        && $invoice->status === InvoiceStatus::Issued
-        && in_array($user->role, [
-            UserRole::OwnerClinic,
-            UserRole::Receptionist,
-        ], true);
-}
+    public function markPaid(User $user, Invoice $invoice): bool
+    {
+        return $user->clinic_id === $invoice->clinic_id
+            && $invoice->status === InvoiceStatus::Issued
+            && in_array($user->role, [
+                UserRole::OwnerClinic,
+                UserRole::Receptionist,
+            ], true);
+    }
 
     public function cancel(User $user, Invoice $invoice): bool
     {

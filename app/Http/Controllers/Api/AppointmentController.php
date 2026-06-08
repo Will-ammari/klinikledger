@@ -183,8 +183,6 @@ class AppointmentController extends Controller
         ]);
     }
 
-
-
     public function cancel(CancelAppointmentRequest $request, Appointment $appointment)
     {
         $this->ensureAppointmentCanBeModified($appointment);
@@ -242,35 +240,35 @@ class AppointmentController extends Controller
         ]);
     }
 
-public function markNoShow(Request $request, Appointment $appointment)
-{
-    $this->authorize('markNoShow', $appointment);
-    $this->ensureAppointmentCanBeModified($appointment);
+    public function markNoShow(Request $request, Appointment $appointment)
+    {
+        $this->authorize('markNoShow', $appointment);
+        $this->ensureAppointmentCanBeModified($appointment);
 
-    if ($appointment->starts_at->isFuture()) {
-        throw ValidationException::withMessages([
-            'appointment' => ['You cannot mark a future appointment as no-show.'],
+        if ($appointment->starts_at->isFuture()) {
+            throw ValidationException::withMessages([
+                'appointment' => ['You cannot mark a future appointment as no-show.'],
+            ]);
+        }
+
+        $appointment->update([
+            'status' => AppointmentStatus::NoShow,
+        ]);
+
+        $this->auditLogger->log(
+            actor: $request->user(),
+            action: AuditAction::AppointmentNoShowMarked,
+            auditable: $appointment,
+            metadata: [
+                'appointment_id' => $appointment->id,
+            ],
+            request: $request
+        );
+
+        return response()->json([
+            'data' => new AppointmentResource($appointment->fresh()->load(['doctor.user', 'patient'])),
         ]);
     }
-
-    $appointment->update([
-        'status' => AppointmentStatus::NoShow,
-    ]);
-
-    $this->auditLogger->log(
-        actor: $request->user(),
-        action: AuditAction::AppointmentNoShowMarked,
-        auditable: $appointment,
-        metadata: [
-            'appointment_id' => $appointment->id,
-        ],
-        request: $request
-    );
-
-    return response()->json([
-        'data' => new AppointmentResource($appointment->fresh()->load(['doctor.user', 'patient'])),
-    ]);
-}
 
     public function reschedule(RescheduleAppointmentRequest $request, Appointment $appointment)
     {
@@ -334,10 +332,10 @@ public function markNoShow(Request $request, Appointment $appointment)
     }
 
     private function normalizeAppointmentSnapshot(Appointment $appointment): array
-{
-    return [
-        'reason' => $appointment->reason,
-        'status' => $appointment->status?->value,
-    ];
-}
+    {
+        return [
+            'reason' => $appointment->reason,
+            'status' => $appointment->status?->value,
+        ];
+    }
 }

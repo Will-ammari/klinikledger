@@ -9,21 +9,21 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-public function up(): void
-{
-    Schema::create('clinics', function (Blueprint $table) {
-        $table->id();
-        $table->string('name');
-        $table->string('slug')->unique();
-        $table->string('email')->nullable();
-        $table->string('phone')->nullable();
-        $table->string('address')->nullable();
-        $table->string('city')->nullable();
-        $table->string('country')->default('Germany');
-        $table->string('timezone')->default('Europe/Berlin');
-        $table->timestamps();
-    });
-}
+    public function up(): void
+    {
+        Schema::create('clinics', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('address')->nullable();
+            $table->string('city')->nullable();
+            $table->string('country')->default('Germany');
+            $table->string('timezone')->default('Europe/Berlin');
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.

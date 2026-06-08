@@ -48,7 +48,7 @@ class AuditLogAuthorizationTest extends TestCase
     private function createClinicWithUser(UserRole $role): array
     {
         $clinic = Clinic::factory()->create([
-            'slug' => 'berlin-family-praxis-' . $role->value,
+            'slug' => 'berlin-family-praxis-'.$role->value,
             'timezone' => 'Europe/Berlin',
         ]);
 
@@ -62,7 +62,7 @@ class AuditLogAuthorizationTest extends TestCase
 
         $user = $userFactory->create([
             'name' => 'Test User',
-            'email' => $role->value . '@example.com',
+            'email' => $role->value.'@example.com',
         ]);
 
         return [$clinic, $user];

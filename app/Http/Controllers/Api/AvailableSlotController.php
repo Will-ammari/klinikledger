@@ -46,12 +46,12 @@ class AvailableSlotController extends Controller
 
         foreach ($workingHours as $workingHour) {
             $cursor = CarbonImmutable::parse(
-                $validated['date'] . ' ' . substr((string) $workingHour->starts_at, 0, 5),
+                $validated['date'].' '.substr((string) $workingHour->starts_at, 0, 5),
                 $timezone
             );
 
             $workingHourEnd = CarbonImmutable::parse(
-                $validated['date'] . ' ' . substr((string) $workingHour->ends_at, 0, 5),
+                $validated['date'].' '.substr((string) $workingHour->ends_at, 0, 5),
                 $timezone
             );
 

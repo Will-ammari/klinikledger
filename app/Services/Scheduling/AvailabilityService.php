@@ -49,12 +49,12 @@ class AvailabilityService
             $date = $startsAt->format('Y-m-d');
 
             $workingStart = CarbonImmutable::parse(
-                $date . ' ' . substr((string) $workingHour->starts_at, 0, 5),
+                $date.' '.substr((string) $workingHour->starts_at, 0, 5),
                 $startsAt->timezone
             );
 
             $workingEnd = CarbonImmutable::parse(
-                $date . ' ' . substr((string) $workingHour->ends_at, 0, 5),
+                $date.' '.substr((string) $workingHour->ends_at, 0, 5),
                 $startsAt->timezone
             );
 

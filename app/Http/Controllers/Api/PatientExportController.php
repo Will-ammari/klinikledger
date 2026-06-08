@@ -16,8 +16,7 @@ class PatientExportController extends Controller
     public function __construct(
         private readonly AuditLogger $auditLogger,
         private readonly PatientExportBuilder $exportBuilder
-    ) {
-    }
+    ) {}
 
     public function store(Request $request, Patient $patient)
     {

@@ -5,14 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ClinicResource;
+use App\Http\Resources\UserResource;
 use App\Models\Clinic;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use App\Http\Resources\ClinicResource;
-use App\Http\Resources\UserResource;
 
 class AuthController extends Controller
 {
@@ -27,7 +27,7 @@ class AuthController extends Controller
 
         $clinic = Clinic::create([
             'name' => $validated['clinic_name'],
-            'slug' => Str::slug($validated['clinic_name']) . '-' . Str::lower(Str::random(6)),
+            'slug' => Str::slug($validated['clinic_name']).'-'.Str::lower(Str::random(6)),
             'email' => $validated['email'],
             'timezone' => 'Europe/Berlin',
         ]);
@@ -83,12 +83,13 @@ class AuthController extends Controller
         ]);
     }
 
-public function me(Request $request)
-{
-    return response()->json([
-        'data' => new UserResource($request->user()->load('clinic')),
-    ]);
-}
+    public function me(Request $request)
+    {
+        return response()->json([
+            'data' => new UserResource($request->user()->load('clinic')),
+        ]);
+    }
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();

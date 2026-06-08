@@ -18,8 +18,7 @@ class DoctorWorkingHourController extends Controller
 {
     public function __construct(
         private readonly AuditLogger $auditLogger
-    ) {
-    }
+    ) {}
 
     public function index(Request $request, Doctor $doctor)
     {

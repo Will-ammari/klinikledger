@@ -17,8 +17,7 @@ class TreatmentNoteController extends Controller
 {
     public function __construct(
         private readonly AuditLogger $auditLogger
-    ) {
-    }
+    ) {}
 
     public function index(Request $request, Appointment $appointment)
     {
@@ -95,41 +94,41 @@ class TreatmentNoteController extends Controller
         ]);
     }
 
-public function update(UpdateTreatmentNoteRequest $request, TreatmentNote $treatmentNote)
-{
-    $before = $this->normalizeNoteSnapshot($treatmentNote);
+    public function update(UpdateTreatmentNoteRequest $request, TreatmentNote $treatmentNote)
+    {
+        $before = $this->normalizeNoteSnapshot($treatmentNote);
 
-    $treatmentNote->update($request->validated());
+        $treatmentNote->update($request->validated());
 
-    $treatmentNote->refresh();
+        $treatmentNote->refresh();
 
-    $after = $this->normalizeNoteSnapshot($treatmentNote);
+        $after = $this->normalizeNoteSnapshot($treatmentNote);
 
-    $changedFields = collect($before)
-        ->filter(function ($oldValue, string $field) use ($after) {
-            return $oldValue !== ($after[$field] ?? null);
-        })
-        ->keys()
-        ->values()
-        ->all();
+        $changedFields = collect($before)
+            ->filter(function ($oldValue, string $field) use ($after) {
+                return $oldValue !== ($after[$field] ?? null);
+            })
+            ->keys()
+            ->values()
+            ->all();
 
-    $this->auditLogger->log(
-        actor: $request->user(),
-        action: AuditAction::TreatmentNoteUpdated,
-        auditable: $treatmentNote,
-        metadata: [
-            'treatment_note_id' => $treatmentNote->id,
-            'changed_fields' => $changedFields,
-        ],
-        request: $request
-    );
+        $this->auditLogger->log(
+            actor: $request->user(),
+            action: AuditAction::TreatmentNoteUpdated,
+            auditable: $treatmentNote,
+            metadata: [
+                'treatment_note_id' => $treatmentNote->id,
+                'changed_fields' => $changedFields,
+            ],
+            request: $request
+        );
 
-    return response()->json([
-        'data' => new TreatmentNoteResource(
-            $treatmentNote->load(['appointment', 'doctor.user', 'patient'])
-        ),
-    ]);
-}
+        return response()->json([
+            'data' => new TreatmentNoteResource(
+                $treatmentNote->load(['appointment', 'doctor.user', 'patient'])
+            ),
+        ]);
+    }
 
     public function destroy(Request $request, TreatmentNote $treatmentNote)
     {
@@ -155,14 +154,15 @@ public function update(UpdateTreatmentNoteRequest $request, TreatmentNote $treat
             'message' => 'Treatment note deleted successfully.',
         ]);
     }
+
     private function normalizeNoteSnapshot(TreatmentNote $treatmentNote): array
-{
-    return [
-        'subjective' => $treatmentNote->subjective,
-        'objective' => $treatmentNote->objective,
-        'assessment' => $treatmentNote->assessment,
-        'plan' => $treatmentNote->plan,
-        'visibility' => $treatmentNote->visibility?->value,
-    ];
-}
+    {
+        return [
+            'subjective' => $treatmentNote->subjective,
+            'objective' => $treatmentNote->objective,
+            'assessment' => $treatmentNote->assessment,
+            'plan' => $treatmentNote->plan,
+            'visibility' => $treatmentNote->visibility?->value,
+        ];
+    }
 }

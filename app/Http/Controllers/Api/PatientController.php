@@ -9,9 +9,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
 use App\Http\Resources\PatientResource;
-use App\Services\Privacy\PatientAnonymizer;
 use App\Models\Patient;
 use App\Services\Audit\AuditLogger;
+use App\Services\Privacy\PatientAnonymizer;
 use Illuminate\Http\Request;
 
 class PatientController extends Controller

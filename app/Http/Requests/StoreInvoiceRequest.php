@@ -42,6 +42,7 @@ class StoreInvoiceRequest extends FormRequest
 
                 if (! $patient) {
                     $validator->errors()->add('patient_id', 'The selected patient does not belong to your clinic.');
+
                     return;
                 }
 
