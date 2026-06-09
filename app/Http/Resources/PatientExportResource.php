@@ -2,9 +2,13 @@
 
 namespace App\Http\Resources;
 
+use App\Models\PatientExport;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin PatientExport
+ */
 class PatientExportResource extends JsonResource
 {
     public function toArray(Request $request): array
