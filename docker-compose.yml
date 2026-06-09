@@ -1,0 +1,79 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: klinikledger_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - klinikledger
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: klinikledger_nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - klinikledger
+
+  mysql:
+    image: mysql:8.4
+    container_name: klinikledger_mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: klinikledger
+      MYSQL_USER: klinikledger
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - klinikledger_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - klinikledger
+
+  redis:
+    image: redis:7-alpine
+    container_name: klinikledger_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - klinikledger
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: klinikledger_mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - klinikledger
+
+networks:
+  klinikledger:
+    driver: bridge
+
+volumes:
+  klinikledger_mysql_data:
+    driver: local
