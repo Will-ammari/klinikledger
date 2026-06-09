@@ -28,7 +28,7 @@ class TreatmentNoteController extends Controller
             ->where('clinic_id', $request->user()->clinic_id)
             ->where('appointment_id', $appointment->id)
             ->latest()
-            ->paginate($request->integer('per_page', 15));
+            ->paginate($this->perPage($request));
 
         return TreatmentNoteResource::collection($notes);
     }

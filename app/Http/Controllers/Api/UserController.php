@@ -27,8 +27,23 @@ class UserController extends Controller
 
         $users = User::query()
             ->where('clinic_id', $request->user()->clinic_id)
+            ->when($request->filled('role'), function ($query) use ($request) {
+                $query->where('role', $request->string('role')->toString());
+            })
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $query->where('status', $request->string('status')->toString());
+            })
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->toString();
+
+                $query->where(function ($query) use ($search) {
+                    $query
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
             ->latest()
-            ->paginate($request->integer('per_page', 15));
+            ->paginate($this->perPage($request));
 
         return UserResource::collection($users);
     }

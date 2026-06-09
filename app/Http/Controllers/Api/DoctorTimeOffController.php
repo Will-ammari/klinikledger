@@ -26,7 +26,7 @@ class DoctorTimeOffController extends Controller
         $timeOffs = $doctor->timeOffs()
             ->where('clinic_id', $request->user()->clinic_id)
             ->latest('starts_at')
-            ->paginate($request->integer('per_page', 15));
+            ->paginate($this->perPage($request));
 
         return DoctorTimeOffResource::collection($timeOffs);
     }

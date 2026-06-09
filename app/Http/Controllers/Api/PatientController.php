@@ -47,7 +47,7 @@ class PatientController extends Controller
                 });
             })
             ->latest()
-            ->paginate($request->integer('per_page', 15));
+            ->paginate($this->perPage($request));
 
         return PatientResource::collection($patients);
     }

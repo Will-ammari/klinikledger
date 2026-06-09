@@ -51,7 +51,7 @@ class AppointmentController extends Controller
                 $query->whereDate('starts_at', $request->date('date'));
             })
             ->orderBy('starts_at')
-            ->paginate($request->integer('per_page', 15));
+            ->paginate($this->perPage($request));
 
         return AppointmentResource::collection($appointments);
     }

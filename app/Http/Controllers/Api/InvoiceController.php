@@ -36,7 +36,7 @@ class InvoiceController extends Controller
                 $query->where('patient_id', $request->integer('patient_id'));
             })
             ->latest()
-            ->paginate($request->integer('per_page', 15));
+            ->paginate($this->perPage($request));
 
         return InvoiceResource::collection($invoices);
     }

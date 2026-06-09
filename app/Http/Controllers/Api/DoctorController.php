@@ -27,8 +27,26 @@ class DoctorController extends Controller
             ->when($request->has('is_active'), function ($query) use ($request) {
                 $query->where('is_active', $request->boolean('is_active'));
             })
+            ->when($request->filled('specialization'), function ($query) use ($request) {
+                $specialization = $request->string('specialization')->toString();
+
+                $query->where('specialization', 'like', "%{$specialization}%");
+            })
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->toString();
+
+                $query->where(function ($query) use ($search) {
+                    $query
+                        ->where('specialization', 'like', "%{$search}%")
+                        ->orWhereHas('user', function ($query) use ($search) {
+                            $query
+                                ->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                        });
+                });
+            })
             ->latest()
-            ->paginate($request->integer('per_page', 15));
+            ->paginate($this->perPage($request));
 
         return DoctorResource::collection($doctors);
     }

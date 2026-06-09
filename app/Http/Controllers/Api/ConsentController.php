@@ -28,7 +28,7 @@ class ConsentController extends Controller
             ->where('clinic_id', $request->user()->clinic_id)
             ->where('patient_id', $patient->id)
             ->latest()
-            ->paginate($request->integer('per_page', 15));
+            ->paginate($this->perPage($request));
 
         $this->auditLogger->log(
             actor: $request->user(),
