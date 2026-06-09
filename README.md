@@ -21,8 +21,10 @@ The goal of this project is to demonstrate practical backend engineering skills 
 - Multi-tenant clinic data isolation
 - Business rules for scheduling, billing, and privacy workflows
 - Audit logging for sensitive operations
+- Filters and pagination for list endpoints
 - Feature tests for critical domain behavior
 - Seeded demo data for quick review
+- Docker Compose local development setup
 - CI-ready project structure
 
 This project is designed as a portfolio case study for backend roles, especially Laravel / REST API roles where authorization, data isolation, testing, and maintainability matter.
@@ -31,11 +33,14 @@ This project is designed as a portfolio case study for backend roles, especially
 
 ## Tech stack
 
-- PHP 8.2+
+- PHP 8.2+ locally
+- PHP 8.3 in Docker
 - Laravel 12
 - Laravel Sanctum
-- SQLite by default for local development and tests
-- MySQL/PostgreSQL compatible Laravel database layer
+- MySQL via Docker Compose
+- SQLite-compatible tests/local development
+- Redis via Docker Compose
+- Mailpit via Docker Compose
 - Eloquent ORM
 - Laravel Form Requests
 - Laravel API Resources
@@ -43,6 +48,7 @@ This project is designed as a portfolio case study for backend roles, especially
 - PHPUnit / Laravel Feature Tests
 - Laravel Pint
 - GitHub Actions CI
+- Docker Compose
 
 ---
 
@@ -54,6 +60,8 @@ This project is designed as a portfolio case study for backend roles, especially
 - Login and logout with Sanctum tokens
 - Retrieve the authenticated user via `/api/me`
 - Manage clinic users
+- Filter users by role, status, and search term
+- Paginate users with capped `per_page` support
 - Change user roles
 - Protect the last `owner_clinic` user from removal/demotion scenarios
 
@@ -88,11 +96,15 @@ The API derives the current clinic from the authenticated user instead of trusti
 - Store specialization
 - Configure default appointment duration
 - Mark doctors as active or inactive
+- Filter doctors by specialization and active status
+- Search doctors by specialization or linked user details
+- Paginate doctors with capped `per_page` support
 
 ### Patients
 
 - Manage patient records inside the authenticated user's clinic
 - Restrict doctors to patients linked to their own appointments
+- Support filters and pagination for patient lists
 - Support GDPR-inspired privacy operations:
   - patient data export
   - patient anonymization
@@ -130,6 +142,7 @@ Business rules include:
 - future appointments cannot be completed
 - future appointments cannot be marked as no-show
 - appointment lifecycle changes are audit logged
+- appointment lists support filtering and pagination
 
 ### Treatment notes
 
@@ -147,6 +160,7 @@ Business rules include:
 - Cancel invoices
 - Prevent updating paid invoices
 - Prevent doctors from accessing invoice workflows
+- Invoice lists support filtering and pagination
 
 ### Consents
 
@@ -184,17 +198,24 @@ Sensitive actions are recorded through audit logs, including:
 
 Only clinic owners can view audit logs.
 
+Audit log lists support filtering and pagination.
+
 ---
 
 ## Demo data
 
 The project includes a demo seeder.
 
-Run:
+Run locally:
 
 ```bash
 php artisan migrate:fresh --seed
+```
 
+Run inside Docker:
+
+```bash
+docker compose exec app php artisan migrate:fresh --seed
 ```
 
 Seeded clinic:
@@ -212,13 +233,89 @@ Seeded clinic:
 
 ---
 
-## Local setup
+## Running with Docker
+
+This project includes a Docker Compose setup for local development and review.
+
+### Docker services
+
+- PHP-FPM application container
+- Nginx web server
+- MySQL database
+- Redis
+- Mailpit for local email testing
+
+### Docker setup
+
+From the project root:
+
+```bash
+cp .env.docker.example .env
+docker compose up -d --build
+docker compose exec app composer install
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate --seed
+```
+
+The application will be available at:
+
+```text
+http://localhost:8080
+```
+
+The API base URL will be:
+
+```text
+http://localhost:8080/api
+```
+
+Mailpit will be available at:
+
+```text
+http://localhost:8025
+```
+
+### Running tests inside Docker
+
+```bash
+docker compose exec app php artisan test
+docker compose exec app ./vendor/bin/pint --test
+```
+
+### Docker database connection from host machine
+
+Use these credentials if you want to connect from a local database client:
+
+| Item | Value |
+| --- | --- |
+| Host | `127.0.0.1` |
+| Port | `3307` |
+| Database | `klinikledger` |
+| Username | `klinikledger` |
+| Password | `secret` |
+
+### Useful Docker commands
+
+```bash
+docker compose ps
+docker compose logs -f
+docker compose logs -f app
+docker compose logs -f nginx
+docker compose down
+docker compose down -v
+```
+
+Use `docker compose down -v` only when you want to remove the database volume and start fresh.
+
+---
+
+## Local setup without Docker
 
 ### Requirements
 
 - PHP 8.2 or newer
 - Composer
-- SQLite extension enabled for PHP
+- SQLite extension enabled for PHP, or another configured database
 
 ### Installation
 
@@ -242,15 +339,23 @@ http://127.0.0.1:8000/api
 
 ## Running tests
 
+Run the full test suite:
+
 ```bash
 php artisan test
+```
+
+Run the test suite inside Docker:
+
+```bash
+docker compose exec app php artisan test
 ```
 
 Current documented stable result:
 
 ```text
-45 tests passed
-160 assertions
+52 tests passed
+175 assertions
 ```
 
 The tests cover the most important business rules:
@@ -264,31 +369,57 @@ The tests cover the most important business rules:
 - patient export
 - patient anonymization
 - audit log authorization
+- filters and capped pagination for list endpoints
 
 ---
 
 ## Code quality
 
-Run Laravel Pint formatting checks:
+Run Laravel Pint formatting checks locally:
 
 ```bash
 ./vendor/bin/pint --test
 ```
 
-Apply formatting:
+Run Laravel Pint formatting checks inside Docker:
+
+```bash
+docker compose exec app ./vendor/bin/pint --test
+```
+
+Apply formatting locally:
 
 ```bash
 ./vendor/bin/pint
+```
+
+Apply formatting inside Docker:
+
+```bash
+docker compose exec app ./vendor/bin/pint
+```
+
+Current documented stable result:
+
+```text
+Laravel Pint PASS
+140 files checked
 ```
 
 ---
 
 ## API overview
 
-Base URL for local development:
+Base URL for local development without Docker:
 
 ```text
 http://127.0.0.1:8000/api
+```
+
+Base URL for Docker development:
+
+```text
+http://localhost:8080/api
 ```
 
 Most endpoints require a Sanctum bearer token.
@@ -322,14 +453,72 @@ Main endpoint groups:
 More endpoint details are documented in [`docs/api.md`](docs/api.md).
 
 A Postman collection is available at [`docs/postman/KlinikLedger.postman_collection.json`](docs/postman/KlinikLedger.postman_collection.json).
+
+---
+
+## List filters and pagination
+
+List endpoints use pagination and selected filters.
+
+### Users
+
+```http
+GET /api/users?role=doctor
+GET /api/users?status=active
+GET /api/users?search=lina
+GET /api/users?per_page=15
+```
+
+Supported filters:
+
+- `role`
+- `status`
+- `search`
+- `per_page`
+
+### Doctors
+
+```http
+GET /api/doctors?specialization=cardio
+GET /api/doctors?is_active=1
+GET /api/doctors?search=lina
+GET /api/doctors?per_page=15
+```
+
+Supported filters:
+
+- `specialization`
+- `is_active`
+- `search`
+- `per_page`
+
+### Pagination behavior
+
+`per_page` is capped to prevent oversized API responses.
+
+```http
+GET /api/users?per_page=500
+```
+
+The API caps the effective page size at `100`.
+
 ---
 
 ## Example API flow
 
-### Login
+### Login without Docker
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/auth/login \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"owner@example.com","password":"password"}'
+```
+
+### Login with Docker
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
   -d '{"email":"owner@example.com","password":"password"}'
@@ -340,7 +529,7 @@ Use the returned token as a bearer token.
 ### Get current user
 
 ```bash
-curl http://127.0.0.1:8000/api/me \
+curl http://localhost:8080/api/me \
   -H "Accept: application/json" \
   -H "Authorization: Bearer <token>"
 ```
@@ -348,7 +537,15 @@ curl http://127.0.0.1:8000/api/me \
 ### List patients
 
 ```bash
-curl http://127.0.0.1:8000/api/patients \
+curl http://localhost:8080/api/patients \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer <token>"
+```
+
+### List doctors with filters
+
+```bash
+curl "http://localhost:8080/api/doctors?search=lina&is_active=1" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer <token>"
 ```
@@ -398,6 +595,8 @@ Implemented security/privacy principles:
 - patient soft deletion/anonymization strategy
 - no real patient data in seeders
 - GDPR-inspired export/anonymization features
+- capped pagination for list responses
+- no secrets committed to the repository
 
 Important wording: this project uses **GDPR-inspired** privacy features. It does not claim legal GDPR compliance.
 
@@ -422,25 +621,55 @@ It runs on pushes and pull requests:
 
 ---
 
+## Postman
+
+A Postman collection is included for API review and manual testing:
+
+```text
+docs/postman/KlinikLedger.postman_collection.json
+```
+
+Recommended manual flow:
+
+1. Login as owner
+2. Call `/api/me`
+3. List patients
+4. List doctors
+5. Create or inspect an appointment
+6. Inspect invoices
+7. Inspect audit logs as owner
+
+---
+
 ## Roadmap
 
 High priority:
 
-- Add OpenAPI or Postman collection
-- Improve filters and pagination for list endpoints
-- Add more endpoint examples to `docs/api.md`
+- Add PHPStan/Larastan static analysis
+- Add queue-based appointment confirmation/reminder emails
+- Add Mailpit-backed email workflow examples
 
 Medium priority:
 
-- Add PHPStan/Larastan static analysis
-- Add Docker Compose with app, nginx, database, redis, and mailpit
-- Add queue-based email reminders
+- Add OpenAPI specification
+- Add more endpoint examples to `docs/api.md`
+- Add generated API reference documentation
 
 Later:
 
 - Add deployment demo
 - Add screenshots or a short demo video
-- Add generated API reference documentation
+- Add CV/LinkedIn packaging notes
+
+Completed portfolio milestones:
+
+- README documentation
+- API documentation in `docs/api.md`
+- Postman collection
+- GitHub Actions CI
+- Feature tests for core business rules
+- Filters and capped pagination
+- Docker Compose local development setup
 
 ---
 
@@ -448,7 +677,11 @@ Later:
 
 Suggested CV description:
 
-> Built a Laravel backend SaaS case study for clinic operations, including multi-tenant data isolation, role-based access control, appointment scheduling, patient records, invoice workflows, audit logging, consent tracking, and GDPR-inspired data export/anonymization features. Designed REST APIs, database schema, service-layer business logic, policies, feature tests, demo seed data, and GitHub Actions CI.
+> Built a Laravel backend SaaS case study for clinic operations, including multi-tenant data isolation, role-based access control, appointment scheduling, patient records, invoice workflows, audit logging, consent tracking, Dockerized local development, and GDPR-inspired data export/anonymization features. Designed REST APIs, database schema, service-layer business logic, policies, feature tests, demo seed data, Postman documentation, and GitHub Actions CI.
+
+Suggested interview explanation:
+
+> KlinikLedger / PraxisFlow is a backend-focused Laravel project that simulates the operational workflow of a small healthcare practice. I built it to demonstrate production-oriented backend concerns: authentication, role-based authorization, tenant-scoped data access, appointment scheduling rules, patient data handling, invoices, audit logs, privacy operations, automated tests, Docker-based local development, and API documentation. It is not a real medical product; it is a portfolio case study focused on backend architecture and maintainability.
 
 ---
 
