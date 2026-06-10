@@ -57,7 +57,7 @@
             "pint --test"
         ],
         "analyse": [
-            "phpstan analyse"
+            "phpstan analyse --memory-limit=512M"
         ],
         "quality": [
             "@test",
