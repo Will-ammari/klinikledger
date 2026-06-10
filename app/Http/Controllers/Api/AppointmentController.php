@@ -11,6 +11,7 @@ use App\Http\Requests\RescheduleAppointmentRequest;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
 use App\Http\Resources\AppointmentResource;
+use App\Jobs\SendAppointmentConfirmationEmail;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Services\Audit\AuditLogger;
@@ -167,6 +168,8 @@ class AppointmentController extends Controller
         $appointment->update([
             'status' => AppointmentStatus::Confirmed,
         ]);
+
+        SendAppointmentConfirmationEmail::dispatch($appointment->fresh());
 
         $this->auditLogger->log(
             actor: $request->user(),

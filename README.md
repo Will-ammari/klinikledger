@@ -375,6 +375,18 @@ The tests cover the most important business rules:
 
 ## Code quality
 
+Run the complete local quality gate:
+
+```bash
+composer quality
+```
+
+This runs:
+
+- the Laravel feature test suite
+- Laravel Pint formatting checks
+- Larastan / PHPStan static analysis
+
 Run Laravel Pint formatting checks locally:
 
 ```bash
@@ -399,11 +411,25 @@ Apply formatting inside Docker:
 docker compose exec app ./vendor/bin/pint
 ```
 
-Current documented stable result:
+Run static analysis locally:
+
+```bash
+./vendor/bin/phpstan analyse
+```
+
+Run static analysis inside Docker:
+
+```bash
+docker compose exec app ./vendor/bin/phpstan analyse
+```
+
+Current documented stable results:
 
 ```text
+52 tests passed
+175 assertions
 Laravel Pint PASS
-140 files checked
+Larastan / PHPStan PASS
 ```
 
 ---
@@ -618,6 +644,7 @@ It runs on pushes and pull requests:
 - run migrations
 - run tests
 - run Laravel Pint formatting check
+- run Larastan / PHPStan static analysis
 
 ---
 
@@ -643,25 +670,26 @@ Recommended manual flow:
 
 ## Roadmap
 
-High priority:
+### High priority
 
-- Add PHPStan/Larastan static analysis
-- Add queue-based appointment confirmation/reminder emails
-- Add Mailpit-backed email workflow examples
+- Add queue-based appointment confirmation emails
+- Add queue-based appointment reminder emails
+- Add Mailpit-backed email workflow examples for local review
+- Add tests that verify appointment email jobs are dispatched at the correct lifecycle points
 
-Medium priority:
+### Medium priority
 
-- Add OpenAPI specification
-- Add more endpoint examples to `docs/api.md`
+- Add an OpenAPI specification for the main public API surface
+- Add more request/response examples to `docs/api.md`
 - Add generated API reference documentation
 
-Later:
+### Later
 
-- Add deployment demo
+- Add a deployment demo
 - Add screenshots or a short demo video
-- Add CV/LinkedIn packaging notes
+- Add release notes for the final portfolio version
 
-Completed portfolio milestones:
+### Completed portfolio milestones
 
 - README documentation
 - API documentation in `docs/api.md`
@@ -670,18 +698,8 @@ Completed portfolio milestones:
 - Feature tests for core business rules
 - Filters and capped pagination
 - Docker Compose local development setup
-
----
-
-## Portfolio positioning
-
-Suggested CV description:
-
-> Built a Laravel backend SaaS case study for clinic operations, including multi-tenant data isolation, role-based access control, appointment scheduling, patient records, invoice workflows, audit logging, consent tracking, Dockerized local development, and GDPR-inspired data export/anonymization features. Designed REST APIs, database schema, service-layer business logic, policies, feature tests, demo seed data, Postman documentation, and GitHub Actions CI.
-
-Suggested interview explanation:
-
-> KlinikLedger / PraxisFlow is a backend-focused Laravel project that simulates the operational workflow of a small healthcare practice. I built it to demonstrate production-oriented backend concerns: authentication, role-based authorization, tenant-scoped data access, appointment scheduling rules, patient data handling, invoices, audit logs, privacy operations, automated tests, Docker-based local development, and API documentation. It is not a real medical product; it is a portfolio case study focused on backend architecture and maintainability.
+- Larastan / PHPStan static analysis
+- Portfolio positioning and project disclaimer
 
 ---
 
