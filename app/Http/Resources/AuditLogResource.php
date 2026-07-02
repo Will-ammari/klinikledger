@@ -3,6 +3,8 @@
 namespace App\Http\Resources;
 
 use App\Models\AuditLog;
+use App\Support\ApiDate;
+use App\Support\ApiEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -15,12 +17,12 @@ class AuditLogResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'action' => $this->action?->value,
+            'action' => ApiEnum::value($this->action),
             'actor' => [
                 'id' => $this->actor?->id,
                 'name' => $this->actor?->name,
                 'email' => $this->actor?->email,
-                'role' => $this->actor?->role?->value,
+                'role' => ApiEnum::value($this->actor?->role),
             ],
             'auditable' => [
                 'type' => $this->auditable_type,
@@ -29,7 +31,7 @@ class AuditLogResource extends JsonResource
             'metadata' => $this->metadata ?? [],
             'ip_address' => $this->ip_address,
             'user_agent' => $this->user_agent,
-            'created_at' => $this->created_at?->toISOString(),
+            'created_at' => ApiDate::datetime($this->created_at),
         ];
     }
 }

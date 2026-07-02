@@ -11,6 +11,7 @@ use App\Http\Resources\TreatmentNoteResource;
 use App\Models\Appointment;
 use App\Models\TreatmentNote;
 use App\Services\Audit\AuditLogger;
+use App\Support\ApiEnum;
 use Illuminate\Http\Request;
 
 class TreatmentNoteController extends Controller
@@ -60,7 +61,7 @@ class TreatmentNoteController extends Controller
                 'appointment_id' => $appointment->id,
                 'doctor_id' => $appointment->doctor_id,
                 'patient_id' => $appointment->patient_id,
-                'visibility' => $note->visibility?->value,
+                'visibility' => ApiEnum::value($note->visibility),
             ],
             request: $request
         );
@@ -162,7 +163,7 @@ class TreatmentNoteController extends Controller
             'objective' => $treatmentNote->objective,
             'assessment' => $treatmentNote->assessment,
             'plan' => $treatmentNote->plan,
-            'visibility' => $treatmentNote->visibility?->value,
+            'visibility' => ApiEnum::value($treatmentNote->visibility),
         ];
     }
 }

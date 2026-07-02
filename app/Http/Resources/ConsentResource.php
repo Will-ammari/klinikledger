@@ -3,6 +3,8 @@
 namespace App\Http\Resources;
 
 use App\Models\Consent;
+use App\Support\ApiDate;
+use App\Support\ApiEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,16 +18,16 @@ class ConsentResource extends JsonResource
         return [
             'id' => $this->id,
             'patient_id' => $this->patient_id,
-            'type' => $this->type?->value,
-            'status' => $this->status?->value,
-            'granted_at' => $this->granted_at?->toISOString(),
-            'withdrawn_at' => $this->withdrawn_at?->toISOString(),
+            'type' => ApiEnum::value($this->type),
+            'status' => ApiEnum::value($this->status),
+            'granted_at' => ApiDate::datetime($this->granted_at),
+            'withdrawn_at' => ApiDate::datetime($this->withdrawn_at),
             'notes' => $this->notes,
             'patient' => new PatientResource($this->whenLoaded('patient')),
             'granted_by' => new UserResource($this->whenLoaded('grantedBy')),
             'withdrawn_by' => new UserResource($this->whenLoaded('withdrawnBy')),
-            'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString(),
+            'created_at' => ApiDate::datetime($this->created_at),
+            'updated_at' => ApiDate::datetime($this->updated_at),
         ];
     }
 }

@@ -12,6 +12,7 @@ use App\Http\Resources\PatientResource;
 use App\Models\Patient;
 use App\Services\Audit\AuditLogger;
 use App\Services\Privacy\PatientAnonymizer;
+use App\Support\ApiDate;
 use Illuminate\Http\Request;
 
 class PatientController extends Controller
@@ -186,7 +187,7 @@ class PatientController extends Controller
             auditable: $patient,
             metadata: [
                 'patient_id' => $originalPatientId,
-                'anonymized_at' => $patient->anonymized_at?->toISOString(),
+                'anonymized_at' => ApiDate::datetime($patient->anonymized_at),
             ],
             request: $request
         );

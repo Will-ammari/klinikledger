@@ -3,6 +3,8 @@
 namespace App\Http\Resources;
 
 use App\Models\User;
+use App\Support\ApiDate;
+use App\Support\ApiEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -18,11 +20,11 @@ class UserResource extends JsonResource
             'clinic_id' => $this->clinic_id,
             'name' => $this->name,
             'email' => $this->email,
-            'role' => $this->role?->value ?? $this->role,
-            'status' => $this->status?->value ?? $this->status,
+            'role' => ApiEnum::value($this->role),
+            'status' => ApiEnum::value($this->status) ?? $this->status,
             'clinic' => new ClinicResource($this->whenLoaded('clinic')),
-            'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString(),
+            'created_at' => ApiDate::datetime($this->created_at),
+            'updated_at' => ApiDate::datetime($this->updated_at),
         ];
     }
 }

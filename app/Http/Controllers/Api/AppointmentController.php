@@ -16,6 +16,8 @@ use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Services\Audit\AuditLogger;
 use App\Services\Scheduling\AvailabilityService;
+use App\Support\ApiDate;
+use App\Support\ApiEnum;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -94,8 +96,8 @@ class AppointmentController extends Controller
                 'appointment_id' => $appointment->id,
                 'doctor_id' => $appointment->doctor_id,
                 'patient_id' => $appointment->patient_id,
-                'starts_at' => $appointment->starts_at?->toISOString(),
-                'ends_at' => $appointment->ends_at?->toISOString(),
+                'starts_at' => ApiDate::datetime($appointment->starts_at),
+                'ends_at' => ApiDate::datetime($appointment->ends_at),
             ],
             request: $request
         );
@@ -217,7 +219,7 @@ class AppointmentController extends Controller
         $this->authorize('complete', $appointment);
         $this->ensureAppointmentCanBeModified($appointment);
 
-        if ($appointment->starts_at->isFuture()) {
+        if (CarbonImmutable::parse($appointment->starts_at)->isFuture()) {
             throw ValidationException::withMessages([
                 'appointment' => ['You cannot complete an appointment before it starts.'],
             ]);
@@ -248,7 +250,7 @@ class AppointmentController extends Controller
         $this->authorize('markNoShow', $appointment);
         $this->ensureAppointmentCanBeModified($appointment);
 
-        if ($appointment->starts_at->isFuture()) {
+        if (CarbonImmutable::parse($appointment->starts_at)->isFuture()) {
             throw ValidationException::withMessages([
                 'appointment' => ['You cannot mark a future appointment as no-show.'],
             ]);
@@ -308,10 +310,10 @@ class AppointmentController extends Controller
             auditable: $appointment,
             metadata: [
                 'appointment_id' => $appointment->id,
-                'old_starts_at' => $oldStartsAt?->toISOString(),
-                'old_ends_at' => $oldEndsAt?->toISOString(),
-                'new_starts_at' => $appointment->fresh()->starts_at?->toISOString(),
-                'new_ends_at' => $appointment->fresh()->ends_at?->toISOString(),
+                'old_starts_at' => ApiDate::datetime($oldStartsAt),
+                'old_ends_at' => ApiDate::datetime($oldEndsAt),
+                'new_starts_at' => ApiDate::datetime($appointment->fresh()->starts_at),
+                'new_ends_at' => ApiDate::datetime($appointment->fresh()->ends_at),
             ],
             request: $request
         );
@@ -338,7 +340,7 @@ class AppointmentController extends Controller
     {
         return [
             'reason' => $appointment->reason,
-            'status' => $appointment->status?->value,
+            'status' => ApiEnum::value($appointment->status),
         ];
     }
 }

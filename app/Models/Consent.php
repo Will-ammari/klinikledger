@@ -34,21 +34,33 @@ class Consent extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Clinic, $this>
+     */
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
     }
 
+    /**
+     * @return BelongsTo<Patient, $this>
+     */
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function grantedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'granted_by_user_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function withdrawnBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'withdrawn_by_user_id');

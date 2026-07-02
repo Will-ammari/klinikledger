@@ -54,15 +54,15 @@
             "@php artisan test"
         ],
         "pint-test": [
-            "pint --test"
+            "@lint"
         ],
         "analyse": [
             "phpstan analyse --memory-limit=512M"
         ],
         "quality": [
-            "@test",
-            "@pint-test",
-            "@analyse"
+            "@lint",
+            "@analyse",
+            "@test"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
@@ -81,6 +81,12 @@
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
+        ],
+        "lint": [
+            "pint --test"
+        ],
+        "format": [
+            "pint"
         ]
     },
     "extra": {

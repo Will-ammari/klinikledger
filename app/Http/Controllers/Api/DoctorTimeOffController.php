@@ -11,6 +11,7 @@ use App\Models\Doctor;
 use App\Models\DoctorTimeOff;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
+use App\Support\ApiDate;
 use Illuminate\Http\Request;
 
 class DoctorTimeOffController extends Controller
@@ -50,8 +51,8 @@ class DoctorTimeOffController extends Controller
             metadata: [
                 'doctor_id' => $doctor->id,
                 'time_off_id' => $timeOff->id,
-                'starts_at' => $timeOff->starts_at?->toISOString(),
-                'ends_at' => $timeOff->ends_at?->toISOString(),
+                'starts_at' => ApiDate::datetime($timeOff->starts_at),
+                'ends_at' => ApiDate::datetime($timeOff->ends_at),
             ],
             request: $request
         );

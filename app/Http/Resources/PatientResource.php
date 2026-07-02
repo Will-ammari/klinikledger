@@ -3,6 +3,8 @@
 namespace App\Http\Resources;
 
 use App\Models\Patient;
+use App\Support\ApiDate;
+use App\Support\ApiEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,14 +22,14 @@ class PatientResource extends JsonResource
             'last_name' => $this->last_name,
             'email' => $this->email,
             'phone' => $this->phone,
-            'date_of_birth' => $this->date_of_birth?->toDateString(),
-            'status' => $this->status?->value,
+            'date_of_birth' => ApiDate::date($this->date_of_birth),
+            'status' => ApiEnum::value($this->status),
             'address' => $this->address,
             'city' => $this->city,
             'is_anonymized' => $this->isAnonymized(),
-            'anonymized_at' => $this->anonymized_at?->toISOString(),
-            'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString(),
+            'anonymized_at' => ApiDate::datetime($this->anonymized_at),
+            'created_at' => ApiDate::datetime($this->created_at),
+            'updated_at' => ApiDate::datetime($this->updated_at),
         ];
     }
 }

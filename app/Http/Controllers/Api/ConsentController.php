@@ -11,6 +11,7 @@ use App\Http\Resources\ConsentResource;
 use App\Models\Consent;
 use App\Models\Patient;
 use App\Services\Audit\AuditLogger;
+use App\Support\ApiEnum;
 use Illuminate\Http\Request;
 
 class ConsentController extends Controller
@@ -75,8 +76,8 @@ class ConsentController extends Controller
             metadata: [
                 'consent_id' => $consent->id,
                 'patient_id' => $patient->id,
-                'type' => $consent->type?->value,
-                'status' => $consent->status?->value,
+                'type' => ApiEnum::value($consent->type),
+                'status' => ApiEnum::value($consent->status),
             ],
             request: $request
         );
@@ -105,7 +106,7 @@ class ConsentController extends Controller
             metadata: [
                 'consent_id' => $consent->id,
                 'patient_id' => $consent->patient_id,
-                'type' => $consent->type?->value,
+                'type' => ApiEnum::value($consent->type),
             ],
             request: $request
         );

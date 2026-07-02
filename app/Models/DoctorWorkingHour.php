@@ -27,11 +27,17 @@ class DoctorWorkingHour extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Clinic, $this>
+     */
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
     }
 
+    /**
+     * @return BelongsTo<Doctor, $this>
+     */
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);

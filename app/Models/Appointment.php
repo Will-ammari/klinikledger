@@ -36,16 +36,25 @@ class Appointment extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Clinic, $this>
+     */
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
     }
 
+    /**
+     * @return BelongsTo<Doctor, $this>
+     */
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
     }
 
+    /**
+     * @return BelongsTo<Patient, $this>
+     */
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
@@ -61,11 +70,17 @@ class Appointment extends Model
         return $this->status === AppointmentStatus::Completed;
     }
 
+    /**
+     * @return HasOne<TreatmentNote, $this>
+     */
     public function treatmentNote(): HasOne
     {
         return $this->hasOne(TreatmentNote::class);
     }
 
+    /**
+     * @return HasOne<Invoice, $this>
+     */
     public function invoice(): HasOne
     {
         return $this->hasOne(Invoice::class);

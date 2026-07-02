@@ -12,6 +12,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
+use App\Support\ApiEnum;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -67,8 +68,8 @@ class UserController extends Controller
             auditable: $user,
             metadata: [
                 'target_user_id' => $user->id,
-                'role' => $user->role->value,
-                'status' => $user->status->value,
+                'role' => ApiEnum::value($user->role),
+                'status' => ApiEnum::value($user->status),
             ],
             request: $request
         );
@@ -161,7 +162,7 @@ class UserController extends Controller
         }
 
         $targetUserId = $user->id;
-        $targetUserRole = $user->role->value;
+        $targetUserRole = ApiEnum::value($user->role);
 
         $user->delete();
 
@@ -211,7 +212,7 @@ class UserController extends Controller
             auditable: $user,
             metadata: [
                 'target_user_id' => $user->id,
-                'old_role' => $oldRole->value,
+                'old_role' => ApiEnum::value($oldRole),
                 'new_role' => $validated['role'],
             ],
             request: $request

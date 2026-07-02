@@ -14,7 +14,14 @@ use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\PatientExportController;
 use App\Http\Controllers\Api\TreatmentNoteController;
 use App\Http\Controllers\Api\UserController;
+use App\Services\Monitoring\HealthCheckService;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/v1/health', function (HealthCheckService $healthCheckService) {
+    $result = $healthCheckService->run();
+
+    return response()->json($result, $result['status'] === 'healthy' ? 200 : 503);
+});
 
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);

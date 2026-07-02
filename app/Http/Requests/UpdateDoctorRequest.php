@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\User;
+use App\Support\ApiEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -44,7 +45,7 @@ class UpdateDoctorRequest extends FormRequest
                 ->where('clinic_id', $this->user()->clinic_id)
                 ->find($this->input('user_id'));
 
-            if ($targetUser && $targetUser->role->value !== 'doctor') {
+            if ($targetUser && ApiEnum::value($targetUser->role) !== 'doctor') {
                 $validator->errors()->add('user_id', 'The selected user must have the doctor role.');
             }
         });

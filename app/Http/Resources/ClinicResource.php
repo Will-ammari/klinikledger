@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Clinic;
+use App\Support\ApiDate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -23,8 +24,8 @@ class ClinicResource extends JsonResource
             'city' => $this->city,
             'country' => $this->country,
             'timezone' => $this->timezone,
-            'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString(),
+            'created_at' => ApiDate::datetime($this->created_at),
+            'updated_at' => ApiDate::datetime($this->updated_at),
         ];
     }
 }

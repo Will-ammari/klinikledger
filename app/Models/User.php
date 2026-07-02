@@ -41,16 +41,25 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * @return BelongsTo<Clinic, $this>
+     */
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
     }
 
+    /**
+     * @return HasOne<Doctor, $this>
+     */
     public function doctorProfile(): HasOne
     {
         return $this->hasOne(Doctor::class);
     }
 
+    /**
+     * @return HasOne<Doctor, $this>
+     */
     public function doctor(): HasOne
     {
         return $this->hasOne(Doctor::class);

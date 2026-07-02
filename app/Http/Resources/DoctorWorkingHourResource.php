@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\DoctorWorkingHour;
+use App\Support\ApiDate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -21,8 +22,8 @@ class DoctorWorkingHourResource extends JsonResource
             'starts_at' => substr((string) $this->starts_at, 0, 5),
             'ends_at' => substr((string) $this->ends_at, 0, 5),
             'is_active' => $this->is_active,
-            'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString(),
+            'created_at' => ApiDate::datetime($this->created_at),
+            'updated_at' => ApiDate::datetime($this->updated_at),
         ];
     }
 

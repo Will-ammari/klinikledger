@@ -3,6 +3,8 @@
 namespace App\Services\Privacy;
 
 use App\Models\Patient;
+use App\Support\ApiDate;
+use App\Support\ApiEnum;
 
 class PatientExportBuilder
 {
@@ -16,7 +18,7 @@ class PatientExportBuilder
         ]);
 
         return [
-            'generated_at' => now()->toISOString(),
+            'generated_at' => ApiDate::datetime(now()),
 
             'patient' => [
                 'id' => $patient->id,
@@ -24,10 +26,10 @@ class PatientExportBuilder
                 'last_name' => $patient->last_name,
                 'email' => $patient->email,
                 'phone' => $patient->phone,
-                'date_of_birth' => optional($patient->date_of_birth)->toDateString(),
-                'status' => $patient->status?->value ?? $patient->status,
-                'created_at' => optional($patient->created_at)->toISOString(),
-                'updated_at' => optional($patient->updated_at)->toISOString(),
+                'date_of_birth' => ApiDate::date($patient->date_of_birth),
+                'status' => ApiEnum::value($patient->status),
+                'created_at' => ApiDate::datetime($patient->created_at),
+                'updated_at' => ApiDate::datetime($patient->updated_at),
             ],
 
             'appointments' => $patient->appointments->map(function ($appointment) {
@@ -35,11 +37,11 @@ class PatientExportBuilder
                     'id' => $appointment->id,
                     'doctor_id' => $appointment->doctor_id,
                     'doctor_name' => $appointment->doctor?->user?->name,
-                    'starts_at' => optional($appointment->starts_at)->toISOString(),
-                    'ends_at' => optional($appointment->ends_at)->toISOString(),
-                    'status' => $appointment->status?->value ?? $appointment->status,
+                    'starts_at' => ApiDate::datetime($appointment->starts_at),
+                    'ends_at' => ApiDate::datetime($appointment->ends_at),
+                    'status' => ApiEnum::value($appointment->status),
                     'reason' => $appointment->reason,
-                    'created_at' => optional($appointment->created_at)->toISOString(),
+                    'created_at' => ApiDate::datetime($appointment->created_at),
                 ];
             })->values()->all(),
 
@@ -47,14 +49,14 @@ class PatientExportBuilder
                 return [
                     'id' => $invoice->id,
                     'appointment_id' => $invoice->appointment_id,
-                    'status' => $invoice->status?->value ?? $invoice->status,
+                    'status' => ApiEnum::value($invoice->status),
                     'subtotal' => $invoice->subtotal,
                     'tax' => $invoice->tax,
                     'total' => $invoice->total,
-                    'due_date' => optional($invoice->due_date)->toDateString(),
-                    'issued_at' => optional($invoice->issued_at)->toISOString(),
-                    'paid_at' => optional($invoice->paid_at)->toISOString(),
-                    'cancelled_at' => optional($invoice->cancelled_at)->toISOString(),
+                    'due_date' => ApiDate::date($invoice->due_date),
+                    'issued_at' => ApiDate::datetime($invoice->issued_at),
+                    'paid_at' => ApiDate::datetime($invoice->paid_at),
+                    'cancelled_at' => ApiDate::datetime($invoice->cancelled_at),
                     'items' => $invoice->items->map(function ($item) {
                         return [
                             'id' => $item->id,
@@ -70,10 +72,10 @@ class PatientExportBuilder
             'consents' => $patient->consents->map(function ($consent) {
                 return [
                     'id' => $consent->id,
-                    'type' => $consent->type?->value ?? $consent->type,
-                    'status' => $consent->status?->value ?? $consent->status,
-                    'granted_at' => optional($consent->granted_at)->toISOString(),
-                    'withdrawn_at' => optional($consent->withdrawn_at)->toISOString(),
+                    'type' => ApiEnum::value($consent->type),
+                    'status' => ApiEnum::value($consent->status),
+                    'granted_at' => ApiDate::datetime($consent->granted_at),
+                    'withdrawn_at' => ApiDate::datetime($consent->withdrawn_at),
                     'notes' => $consent->notes,
                     'granted_by_user_id' => $consent->granted_by_user_id,
                     'withdrawn_by_user_id' => $consent->withdrawn_by_user_id,

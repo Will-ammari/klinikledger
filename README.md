@@ -11,6 +11,98 @@ It simulates the backend workflows of a small clinic: authentication, clinic-sco
 
 ---
 
+## Hiring Signal
+
+KlinikLedger demonstrates that I can build privacy-conscious, healthcare-style Laravel backends rather than only CRUD APIs. The project combines clinic-scoped authorization, patient privacy workflows, audit logging, appointment availability, invoice workflows, automated tests, static analysis, request tracing, standardized API errors, and CI quality gates.
+
+Target positioning:
+
+```text
+Backend Developer | PHP/Laravel | REST APIs | Healthcare-style Workflows | Docker | PHPUnit | PHPStan | CI
+```
+
+---
+
+## Production Readiness
+
+The codebase includes production-oriented backend patterns for a portfolio review context:
+
+- Laravel Pint formatting checks
+- Larastan / PHPStan static analysis
+- PHPUnit feature coverage for critical domain workflows
+- GitHub Actions CI quality gate
+- Standardized JSON API error responses
+- `X-Request-Id` request tracing for API responses and log correlation
+- Health endpoint at `GET /api/v1/health`
+- Docker Compose development environment
+
+---
+
+## Privacy & GDPR-inspired Design
+
+KlinikLedger implements GDPR-inspired privacy workflows for portfolio purposes. It is not a legal compliance claim and is not certified for real healthcare production use.
+
+Privacy-oriented workflows include:
+
+- patient export
+- patient anonymization
+- consent records
+- audit logs for sensitive patient operations
+- clinic-scoped access control
+- role-based authorization for owners, doctors, and receptionists
+
+---
+
+## Quality & Test Coverage
+
+The quality gate is intentionally simple and review-friendly:
+
+```bash
+composer quality
+```
+
+This runs:
+
+```bash
+composer lint
+composer analyse
+composer test
+```
+
+Core tested areas include patient export, patient anonymization, clinic isolation, audit log authorization, consent workflows, invoice workflows, appointment scheduling, treatment note visibility, standardized API errors, and the health endpoint.
+
+---
+
+## Architecture
+
+KlinikLedger follows a conventional Laravel MVC/API structure with domain-focused services:
+
+- Form Requests for validation
+- Policies for role and clinic-scoped authorization
+- API Resources for response shape consistency
+- Services for audit logging, scheduling availability, invoice calculation, patient export, patient anonymization, and health checks
+- Feature tests for business-critical flows
+
+---
+
+## Health Monitoring
+
+The public health endpoint is available at:
+
+```http
+GET /api/v1/health
+```
+
+It checks:
+
+- database connectivity
+- cache read/write behavior
+- queue configuration
+- Redis connectivity when Redis is used by the active cache or queue configuration
+- per-check latency in milliseconds
+
+---
+
 ## Why this project exists
 
 The goal of this project is to demonstrate practical backend engineering skills beyond basic CRUD:
@@ -390,7 +482,7 @@ This runs:
 Run Laravel Pint formatting checks locally:
 
 ```bash
-./vendor/bin/pint --test
+composer lint
 ```
 
 Run Laravel Pint formatting checks inside Docker:
@@ -402,7 +494,7 @@ docker compose exec app ./vendor/bin/pint --test
 Apply formatting locally:
 
 ```bash
-./vendor/bin/pint
+composer format
 ```
 
 Apply formatting inside Docker:
@@ -414,7 +506,7 @@ docker compose exec app ./vendor/bin/pint
 Run static analysis locally:
 
 ```bash
-./vendor/bin/phpstan analyse
+composer analyse
 ```
 
 Run static analysis inside Docker:

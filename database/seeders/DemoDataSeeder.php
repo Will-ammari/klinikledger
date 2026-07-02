@@ -21,6 +21,7 @@ class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
+        /** @var Clinic $clinic */
         $clinic = Clinic::query()->updateOrCreate(
             ['slug' => 'berlin-family-praxis'],
             [
@@ -34,6 +35,7 @@ class DemoDataSeeder extends Seeder
             ]
         );
 
+        /** @var User $owner */
         $owner = User::factory()
             ->owner()
             ->for($clinic)
@@ -43,6 +45,7 @@ class DemoDataSeeder extends Seeder
                 'password' => Hash::make('password'),
             ]);
 
+        /** @var User $receptionist */
         $receptionist = User::factory()
             ->receptionist()
             ->for($clinic)
@@ -52,6 +55,7 @@ class DemoDataSeeder extends Seeder
                 'password' => Hash::make('password'),
             ]);
 
+        /** @var User $doctorUser */
         $doctorUser = User::factory()
             ->doctor()
             ->for($clinic)
@@ -61,6 +65,7 @@ class DemoDataSeeder extends Seeder
                 'password' => Hash::make('password'),
             ]);
 
+        /** @var Doctor $doctor */
         $doctor = Doctor::factory()
             ->linkedToUser($doctorUser)
             ->create([
@@ -74,6 +79,7 @@ class DemoDataSeeder extends Seeder
             ->mondayMorning()
             ->create();
 
+        /** @var Patient $patient */
         $patient = Patient::factory()
             ->forClinic($clinic)
             ->create([
@@ -86,6 +92,7 @@ class DemoDataSeeder extends Seeder
                 'city' => 'Berlin',
             ]);
 
+        /** @var Appointment $appointment */
         $appointment = Appointment::factory()
             ->forClinicDoctorAndPatient($clinic, $doctor, $patient)
             ->scheduledAt('2026-06-08 09:00:00')
@@ -94,6 +101,7 @@ class DemoDataSeeder extends Seeder
                 'reason' => 'Initial consultation',
             ]);
 
+        /** @var Invoice $invoice */
         $invoice = Invoice::create([
             'clinic_id' => $clinic->id,
             'patient_id' => $patient->id,

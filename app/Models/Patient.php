@@ -36,11 +36,17 @@ class Patient extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Clinic, $this>
+     */
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
     }
 
+    /**
+     * @return HasMany<Appointment, $this>
+     */
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class);
@@ -56,21 +62,33 @@ class Patient extends Model
         return $this->anonymized_at !== null;
     }
 
+    /**
+     * @return HasMany<TreatmentNote, $this>
+     */
     public function treatmentNotes(): HasMany
     {
         return $this->hasMany(TreatmentNote::class);
     }
 
+    /**
+     * @return HasMany<Invoice, $this>
+     */
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }
 
+    /**
+     * @return HasMany<Consent, $this>
+     */
     public function consents(): HasMany
     {
         return $this->hasMany(Consent::class);
     }
 
+    /**
+     * @return HasMany<PatientExport, $this>
+     */
     public function exports(): HasMany
     {
         return $this->hasMany(PatientExport::class);

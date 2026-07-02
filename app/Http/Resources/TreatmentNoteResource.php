@@ -3,6 +3,8 @@
 namespace App\Http\Resources;
 
 use App\Models\TreatmentNote;
+use App\Support\ApiDate;
+use App\Support\ApiEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -22,12 +24,12 @@ class TreatmentNoteResource extends JsonResource
             'objective' => $this->objective,
             'assessment' => $this->assessment,
             'plan' => $this->plan,
-            'visibility' => $this->visibility?->value,
+            'visibility' => ApiEnum::value($this->visibility),
             'appointment' => new AppointmentResource($this->whenLoaded('appointment')),
             'doctor' => new DoctorResource($this->whenLoaded('doctor')),
             'patient' => new PatientResource($this->whenLoaded('patient')),
-            'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString(),
+            'created_at' => ApiDate::datetime($this->created_at),
+            'updated_at' => ApiDate::datetime($this->updated_at),
         ];
     }
 }
