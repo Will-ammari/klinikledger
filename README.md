@@ -36,6 +36,16 @@ The codebase includes production-oriented backend patterns for a portfolio revie
 - Health endpoint at `GET /api/v1/health`
 - Docker Compose development environment
 
+Current verified quality status:
+
+```text
+Laravel Pint: PASS
+PHPStan / Larastan: no errors
+PHPUnit: 58 tests / 213 assertions
+GitHub Actions CI: green
+composer quality: PASS
+```
+
 ---
 
 ## Privacy & GDPR-inspired Design
@@ -69,7 +79,17 @@ composer analyse
 composer test
 ```
 
-Core tested areas include patient export, patient anonymization, clinic isolation, audit log authorization, consent workflows, invoice workflows, appointment scheduling, treatment note visibility, standardized API errors, and the health endpoint.
+Current stable result:
+
+```text
+58 tests passed
+213 assertions
+Laravel Pint PASS
+Larastan / PHPStan PASS with no errors
+GitHub Actions CI green
+```
+
+Core tested areas include patient export, patient anonymization, clinic isolation, audit log authorization, consent workflows, invoice workflows, appointment scheduling, appointment email and reminder jobs, treatment note visibility, standardized API errors, request ID tracing, and the health endpoint.
 
 ---
 
@@ -446,8 +466,8 @@ docker compose exec app php artisan test
 Current documented stable result:
 
 ```text
-52 tests passed
-175 assertions
+58 tests passed
+213 assertions
 ```
 
 The tests cover the most important business rules:
@@ -475,9 +495,9 @@ composer quality
 
 This runs:
 
-- the Laravel feature test suite
 - Laravel Pint formatting checks
 - Larastan / PHPStan static analysis
+- the Laravel feature test suite
 
 Run Laravel Pint formatting checks locally:
 
@@ -518,10 +538,11 @@ docker compose exec app ./vendor/bin/phpstan analyse
 Current documented stable results:
 
 ```text
-52 tests passed
-175 assertions
+58 tests passed
+213 assertions
 Laravel Pint PASS
-Larastan / PHPStan PASS
+Larastan / PHPStan PASS with no errors
+GitHub Actions CI green
 ```
 
 ---
@@ -722,21 +743,23 @@ Important wording: this project uses **GDPR-inspired** privacy features. It does
 
 ## Continuous integration
 
-GitHub Actions workflow is included at:
+GitHub Actions workflows are included under:
 
 ```text
-.github/workflows/tests.yml
+.github/workflows/
 ```
 
-It runs on pushes and pull requests:
+The CI quality gate runs on pushes and pull requests and verifies:
 
-- install PHP dependencies
-- prepare `.env`
-- generate app key
-- run migrations
-- run tests
-- run Laravel Pint formatting check
-- run Larastan / PHPStan static analysis
+- PHP dependency installation
+- environment preparation
+- application key generation
+- database migrations
+- Laravel Pint formatting checks
+- Larastan / PHPStan static analysis
+- PHPUnit feature and unit tests
+
+The current CI status is green.
 
 ---
 
@@ -764,13 +787,6 @@ Recommended manual flow:
 
 ### High priority
 
-- Add queue-based appointment confirmation emails
-- Add queue-based appointment reminder emails
-- Add Mailpit-backed email workflow examples for local review
-- Add tests that verify appointment email jobs are dispatched at the correct lifecycle points
-
-### Medium priority
-
 - Add an OpenAPI specification for the main public API surface
 - Add more request/response examples to `docs/api.md`
 - Add generated API reference documentation
@@ -787,10 +803,22 @@ Recommended manual flow:
 - API documentation in `docs/api.md`
 - Postman collection
 - GitHub Actions CI
+- `composer quality` quality gate
+- Laravel Pint formatting checks
+- Larastan / PHPStan static analysis with no errors
+- 58 passing automated tests / 213 assertions
+- Standardized API error responses
+- Request ID tracing with `X-Request-Id`
+- Health endpoint at `GET /api/v1/health`
 - Feature tests for core business rules
+- Patient export workflow
+- Patient anonymization workflow
+- Consent workflow tests
+- Audit log authorization tests
+- Appointment confirmation email queue workflow
+- Appointment reminder command workflow
 - Filters and capped pagination
 - Docker Compose local development setup
-- Larastan / PHPStan static analysis
 - Portfolio positioning and project disclaimer
 
 ---
