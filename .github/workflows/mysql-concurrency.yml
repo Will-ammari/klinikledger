@@ -1,0 +1,67 @@
+name: MySQL booking concurrency
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  mysql-concurrency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: klinikledger_concurrency_test
+          MYSQL_USER: klinikledger_ci
+          MYSQL_PASSWORD: test_only_password
+          MYSQL_ROOT_PASSWORD: test_only_root_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -ptest_only_root_password"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=25
+
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: '3306'
+      DB_DATABASE: klinikledger_concurrency_test
+      DB_USERNAME: klinikledger_ci
+      DB_PASSWORD: test_only_password
+      DB_URL: ''
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+      KLINIK_CONCURRENCY_TEST: '1'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, fileinfo, pdo_mysql, pdo_sqlite, intl, bcmath, zip
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare Laravel key
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Migrate isolated MySQL test database
+        run: php artisan migrate --force
+
+      - name: Exercise simultaneous booking over independent connections
+        run: php vendor/bin/phpunit -c phpunit.mysql.xml
