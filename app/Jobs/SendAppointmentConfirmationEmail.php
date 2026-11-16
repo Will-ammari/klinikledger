@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\AppointmentStatus;
 use App\Mail\AppointmentConfirmationMail;
 use App\Models\Appointment;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -20,13 +21,13 @@ class SendAppointmentConfirmationEmail implements ShouldQueue
 
     public function handle(): void
     {
-        $appointment = $this->appointment->loadMissing([
+        $appointment = $this->appointment->fresh()?->load([
             'clinic',
             'doctor.user',
             'patient',
         ]);
 
-        if ($appointment->patient->email === null) {
+        if ($appointment?->status !== AppointmentStatus::Confirmed || $appointment->patient?->email === null) {
             return;
         }
 

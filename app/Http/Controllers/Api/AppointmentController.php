@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\AppointmentStatus;
 use App\Enums\AuditAction;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
@@ -11,22 +10,18 @@ use App\Http\Requests\RescheduleAppointmentRequest;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
 use App\Http\Resources\AppointmentResource;
-use App\Jobs\SendAppointmentConfirmationEmail;
 use App\Models\Appointment;
-use App\Models\Doctor;
 use App\Services\Audit\AuditLogger;
-use App\Services\Scheduling\AvailabilityService;
-use App\Support\ApiDate;
-use App\Support\ApiEnum;
-use Carbon\CarbonImmutable;
+use App\Services\Scheduling\AppointmentWorkflow;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
+/** HTTP orchestration only: validation/authorization remain in Form Requests and Policies. */
 class AppointmentController extends Controller
 {
     public function __construct(
-        private readonly AvailabilityService $availabilityService,
-        private readonly AuditLogger $auditLogger
+        private readonly AppointmentWorkflow $workflow,
+        private readonly AuditLogger $auditLogger,
     ) {}
 
     public function index(Request $request)
@@ -59,55 +54,14 @@ class AppointmentController extends Controller
         return AppointmentResource::collection($appointments);
     }
 
-    public function store(StoreAppointmentRequest $request)
+    public function store(StoreAppointmentRequest $request): JsonResponse
     {
-        $validated = $request->validated();
+        $appointment = $this->workflow->book($request->user(), $request->validated(), $request);
 
-        $doctor = Doctor::query()
-            ->where('clinic_id', $request->user()->clinic_id)
-            ->findOrFail($validated['doctor_id']);
-
-        $timezone = $request->user()->clinic?->timezone ?? config('app.timezone');
-
-        $startsAt = CarbonImmutable::parse($validated['starts_at'], $timezone);
-        $endsAt = $startsAt->addMinutes($doctor->appointment_duration_minutes);
-
-        if (! $this->availabilityService->isDoctorAvailable($doctor, $startsAt, $endsAt)) {
-            throw ValidationException::withMessages([
-                'starts_at' => ['The selected doctor is not available at this time.'],
-            ]);
-        }
-
-        $appointment = Appointment::create([
-            'clinic_id' => $request->user()->clinic_id,
-            'doctor_id' => $doctor->id,
-            'patient_id' => $validated['patient_id'],
-            'starts_at' => $startsAt,
-            'ends_at' => $endsAt,
-            'status' => AppointmentStatus::Scheduled,
-            'reason' => $validated['reason'] ?? null,
-        ]);
-
-        $this->auditLogger->log(
-            actor: $request->user(),
-            action: AuditAction::AppointmentCreated,
-            auditable: $appointment,
-            metadata: [
-                'appointment_id' => $appointment->id,
-                'doctor_id' => $appointment->doctor_id,
-                'patient_id' => $appointment->patient_id,
-                'starts_at' => ApiDate::datetime($appointment->starts_at),
-                'ends_at' => ApiDate::datetime($appointment->ends_at),
-            ],
-            request: $request
-        );
-
-        return response()->json([
-            'data' => new AppointmentResource($appointment->load(['doctor.user', 'patient'])),
-        ], 201);
+        return $this->respond($appointment, 201);
     }
 
-    public function show(Request $request, Appointment $appointment)
+    public function show(Request $request, Appointment $appointment): JsonResponse
     {
         $this->authorize('view', $appointment);
 
@@ -115,232 +69,53 @@ class AppointmentController extends Controller
             actor: $request->user(),
             action: AuditAction::AppointmentViewed,
             auditable: $appointment,
-            metadata: [
-                'appointment_id' => $appointment->id,
-            ],
-            request: $request
+            metadata: ['appointment_id' => $appointment->id],
+            request: $request,
         );
 
-        return response()->json([
-            'data' => new AppointmentResource($appointment->load(['doctor.user', 'patient'])),
-        ]);
+        return $this->respond($appointment);
     }
 
-    public function update(UpdateAppointmentRequest $request, Appointment $appointment)
+    public function update(UpdateAppointmentRequest $request, Appointment $appointment): JsonResponse
     {
-        $this->ensureAppointmentCanBeModified($appointment);
-
-        $before = $this->normalizeAppointmentSnapshot($appointment);
-
-        $appointment->update($request->validated());
-
-        $appointment->refresh();
-
-        $after = $this->normalizeAppointmentSnapshot($appointment);
-
-        $changedFields = collect($before)
-            ->filter(function ($oldValue, string $field) use ($after) {
-                return $oldValue !== ($after[$field] ?? null);
-            })
-            ->keys()
-            ->values()
-            ->all();
-
-        $this->auditLogger->log(
-            actor: $request->user(),
-            action: AuditAction::AppointmentUpdated,
-            auditable: $appointment,
-            metadata: [
-                'appointment_id' => $appointment->id,
-                'changed_fields' => $changedFields,
-            ],
-            request: $request
-        );
-
-        return response()->json([
-            'data' => new AppointmentResource($appointment->load(['doctor.user', 'patient'])),
-        ]);
+        return $this->respond($this->workflow->update($request->user(), $appointment, $request->validated(), $request));
     }
 
-    public function confirm(Request $request, Appointment $appointment)
+    public function confirm(Request $request, Appointment $appointment): JsonResponse
     {
         $this->authorize('confirm', $appointment);
-        $this->ensureAppointmentCanBeModified($appointment);
 
-        $appointment->update([
-            'status' => AppointmentStatus::Confirmed,
-        ]);
-
-        SendAppointmentConfirmationEmail::dispatch($appointment->fresh());
-
-        $this->auditLogger->log(
-            actor: $request->user(),
-            action: AuditAction::AppointmentConfirmed,
-            auditable: $appointment,
-            metadata: [
-                'appointment_id' => $appointment->id,
-            ],
-            request: $request
-        );
-
-        return response()->json([
-            'data' => new AppointmentResource($appointment->fresh()->load(['doctor.user', 'patient'])),
-        ]);
+        return $this->respond($this->workflow->confirm($request->user(), $appointment, $request));
     }
 
-    public function cancel(CancelAppointmentRequest $request, Appointment $appointment)
+    public function cancel(CancelAppointmentRequest $request, Appointment $appointment): JsonResponse
     {
-        $this->ensureAppointmentCanBeModified($appointment);
-
-        $appointment->update([
-            'status' => AppointmentStatus::Cancelled,
-            'cancellation_reason' => $request->validated()['cancellation_reason'] ?? null,
-            'cancelled_at' => now(),
-        ]);
-
-        $this->auditLogger->log(
-            actor: $request->user(),
-            action: AuditAction::AppointmentCancelled,
-            auditable: $appointment,
-            metadata: [
-                'appointment_id' => $appointment->id,
-                'reason_provided' => $request->filled('cancellation_reason'),
-            ],
-            request: $request
-        );
-
-        return response()->json([
-            'data' => new AppointmentResource($appointment->fresh()->load(['doctor.user', 'patient'])),
-        ]);
+        return $this->respond($this->workflow->cancel($request->user(), $appointment, $request->validated(), $request));
     }
 
-    public function complete(Request $request, Appointment $appointment)
+    public function complete(Request $request, Appointment $appointment): JsonResponse
     {
         $this->authorize('complete', $appointment);
-        $this->ensureAppointmentCanBeModified($appointment);
 
-        if (CarbonImmutable::parse($appointment->starts_at)->isFuture()) {
-            throw ValidationException::withMessages([
-                'appointment' => ['You cannot complete an appointment before it starts.'],
-            ]);
-        }
-
-        $appointment->update([
-            'status' => AppointmentStatus::Completed,
-            'completed_at' => now(),
-        ]);
-
-        $this->auditLogger->log(
-            actor: $request->user(),
-            action: AuditAction::AppointmentCompleted,
-            auditable: $appointment,
-            metadata: [
-                'appointment_id' => $appointment->id,
-            ],
-            request: $request
-        );
-
-        return response()->json([
-            'data' => new AppointmentResource($appointment->fresh()->load(['doctor.user', 'patient'])),
-        ]);
+        return $this->respond($this->workflow->complete($request->user(), $appointment, $request));
     }
 
-    public function markNoShow(Request $request, Appointment $appointment)
+    public function markNoShow(Request $request, Appointment $appointment): JsonResponse
     {
         $this->authorize('markNoShow', $appointment);
-        $this->ensureAppointmentCanBeModified($appointment);
 
-        if (CarbonImmutable::parse($appointment->starts_at)->isFuture()) {
-            throw ValidationException::withMessages([
-                'appointment' => ['You cannot mark a future appointment as no-show.'],
-            ]);
-        }
+        return $this->respond($this->workflow->markNoShow($request->user(), $appointment, $request));
+    }
 
-        $appointment->update([
-            'status' => AppointmentStatus::NoShow,
-        ]);
+    public function reschedule(RescheduleAppointmentRequest $request, Appointment $appointment): JsonResponse
+    {
+        return $this->respond($this->workflow->reschedule($request->user(), $appointment, $request->validated(), $request));
+    }
 
-        $this->auditLogger->log(
-            actor: $request->user(),
-            action: AuditAction::AppointmentNoShowMarked,
-            auditable: $appointment,
-            metadata: [
-                'appointment_id' => $appointment->id,
-            ],
-            request: $request
-        );
-
+    private function respond(Appointment $appointment, int $status = 200): JsonResponse
+    {
         return response()->json([
-            'data' => new AppointmentResource($appointment->fresh()->load(['doctor.user', 'patient'])),
-        ]);
-    }
-
-    public function reschedule(RescheduleAppointmentRequest $request, Appointment $appointment)
-    {
-        $this->ensureAppointmentCanBeModified($appointment);
-
-        $timezone = $request->user()->clinic?->timezone ?? config('app.timezone');
-
-        $oldStartsAt = $appointment->starts_at;
-        $oldEndsAt = $appointment->ends_at;
-
-        $startsAt = CarbonImmutable::parse($request->validated()['starts_at'], $timezone);
-        $endsAt = $startsAt->addMinutes($appointment->doctor->appointment_duration_minutes);
-
-        if (! $this->availabilityService->isDoctorAvailable(
-            doctor: $appointment->doctor,
-            startsAt: $startsAt,
-            endsAt: $endsAt,
-            ignoreAppointmentId: $appointment->id
-        )) {
-            throw ValidationException::withMessages([
-                'starts_at' => ['The selected doctor is not available at this time.'],
-            ]);
-        }
-
-        $appointment->update([
-            'starts_at' => $startsAt,
-            'ends_at' => $endsAt,
-            'status' => AppointmentStatus::Scheduled,
-        ]);
-
-        $this->auditLogger->log(
-            actor: $request->user(),
-            action: AuditAction::AppointmentRescheduled,
-            auditable: $appointment,
-            metadata: [
-                'appointment_id' => $appointment->id,
-                'old_starts_at' => ApiDate::datetime($oldStartsAt),
-                'old_ends_at' => ApiDate::datetime($oldEndsAt),
-                'new_starts_at' => ApiDate::datetime($appointment->fresh()->starts_at),
-                'new_ends_at' => ApiDate::datetime($appointment->fresh()->ends_at),
-            ],
-            request: $request
-        );
-
-        return response()->json([
-            'data' => new AppointmentResource($appointment->fresh()->load(['doctor.user', 'patient'])),
-        ]);
-    }
-
-    private function ensureAppointmentCanBeModified(Appointment $appointment): void
-    {
-        if (in_array($appointment->status, [
-            AppointmentStatus::Cancelled,
-            AppointmentStatus::Completed,
-            AppointmentStatus::NoShow,
-        ], true)) {
-            throw ValidationException::withMessages([
-                'appointment' => ['This appointment can no longer be modified.'],
-            ]);
-        }
-    }
-
-    private function normalizeAppointmentSnapshot(Appointment $appointment): array
-    {
-        return [
-            'reason' => $appointment->reason,
-            'status' => ApiEnum::value($appointment->status),
-        ];
+            'data' => new AppointmentResource($appointment->load(['doctor.user', 'patient'])),
+        ], $status);
     }
 }

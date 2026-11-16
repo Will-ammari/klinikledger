@@ -11,12 +11,29 @@ use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class AppointmentEmailQueueTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_queued_confirmation_does_not_email_a_subsequently_cancelled_appointment(): void
+    {
+        Mail::fake();
+
+        $clinic = Clinic::factory()->create();
+        $doctor = Doctor::factory()->forClinic($clinic)->create();
+        $patient = Patient::factory()->forClinic($clinic)->create(['email' => 'patient@example.test']);
+        $appointment = Appointment::factory()->forClinicDoctorAndPatient($clinic, $doctor, $patient)->create([
+            'status' => AppointmentStatus::Cancelled,
+        ]);
+
+        (new SendAppointmentConfirmationEmail($appointment))->handle();
+
+        Mail::assertNothingSent();
+    }
 
     public function test_confirming_an_appointment_dispatches_confirmation_email_job(): void
     {

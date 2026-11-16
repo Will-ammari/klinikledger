@@ -4,13 +4,16 @@ namespace Tests\Feature;
 
 use App\Enums\AppointmentStatus;
 use App\Enums\AuditAction;
+use App\Jobs\SendAppointmentConfirmationEmail;
 use App\Models\Appointment;
+use App\Models\AuditLog;
 use App\Models\Clinic;
 use App\Models\Doctor;
 use App\Models\DoctorWorkingHour;
 use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -199,6 +202,43 @@ class AppointmentLifecycleTest extends TestCase
             'starts_at' => '2026-06-08 10:00:00',
         ])->assertUnprocessable()
             ->assertJsonValidationErrors(['appointment']);
+    }
+
+    public function test_repeated_confirm_is_idempotent_and_queues_one_email(): void
+    {
+        [, , $receptionist, , , , $appointment] = $this->createLifecycleScenario();
+        Queue::fake();
+        Sanctum::actingAs($receptionist);
+
+        $this->postJson("/api/appointments/{$appointment->id}/confirm")
+            ->assertOk()->assertJsonPath('data.status', AppointmentStatus::Confirmed->value);
+        $this->postJson("/api/appointments/{$appointment->id}/confirm")
+            ->assertOk()->assertJsonPath('data.status', AppointmentStatus::Confirmed->value);
+
+        Queue::assertPushed(SendAppointmentConfirmationEmail::class, 1);
+        $this->assertSame(1, AuditLog::query()
+            ->where('auditable_type', $appointment->getMorphClass())
+            ->where('auditable_id', $appointment->id)
+            ->where('action', AuditAction::AppointmentConfirmed->value)
+            ->count());
+    }
+
+    public function test_cancelled_appointment_cannot_be_reconfirmed_or_updated(): void
+    {
+        [, , $receptionist, , , , $appointment] = $this->createLifecycleScenario();
+        Sanctum::actingAs($receptionist);
+
+        $this->postJson("/api/appointments/{$appointment->id}/cancel")
+            ->assertOk()->assertJsonPath('data.status', AppointmentStatus::Cancelled->value);
+        $this->postJson("/api/appointments/{$appointment->id}/confirm")
+            ->assertUnprocessable()->assertJsonValidationErrors(['appointment']);
+        $this->patchJson("/api/appointments/{$appointment->id}", ['reason' => 'Updated'])
+            ->assertUnprocessable()->assertJsonValidationErrors(['appointment']);
+
+        $this->assertDatabaseHas('appointments', [
+            'id' => $appointment->id,
+            'status' => AppointmentStatus::Cancelled->value,
+        ]);
     }
 
     private function createLifecycleScenario(array $appointmentOverrides = []): array

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\AuditAction;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDoctorTimeOffRequest;
@@ -10,14 +9,13 @@ use App\Http\Resources\DoctorTimeOffResource;
 use App\Models\Doctor;
 use App\Models\DoctorTimeOff;
 use App\Models\User;
-use App\Services\Audit\AuditLogger;
-use App\Support\ApiDate;
+use App\Services\Scheduling\DoctorScheduleWorkflow;
 use Illuminate\Http\Request;
 
 class DoctorTimeOffController extends Controller
 {
     public function __construct(
-        private readonly AuditLogger $auditLogger
+        private readonly DoctorScheduleWorkflow $workflow
     ) {}
 
     public function index(Request $request, Doctor $doctor)
@@ -36,26 +34,7 @@ class DoctorTimeOffController extends Controller
     {
         $validated = $request->validated();
 
-        $timeOff = DoctorTimeOff::create([
-            'clinic_id' => $request->user()->clinic_id,
-            'doctor_id' => $doctor->id,
-            'starts_at' => $validated['starts_at'],
-            'ends_at' => $validated['ends_at'],
-            'reason' => $validated['reason'] ?? null,
-        ]);
-
-        $this->auditLogger->log(
-            actor: $request->user(),
-            action: AuditAction::DoctorTimeOffCreated,
-            auditable: $timeOff,
-            metadata: [
-                'doctor_id' => $doctor->id,
-                'time_off_id' => $timeOff->id,
-                'starts_at' => ApiDate::datetime($timeOff->starts_at),
-                'ends_at' => ApiDate::datetime($timeOff->ends_at),
-            ],
-            request: $request
-        );
+        $timeOff = $this->workflow->addTimeOff($request->user(), $doctor, $validated, $request);
 
         return response()->json([
             'data' => new DoctorTimeOffResource($timeOff),
@@ -72,20 +51,7 @@ class DoctorTimeOffController extends Controller
             404
         );
 
-        $timeOffId = $timeOff->id;
-
-        $timeOff->delete();
-
-        $this->auditLogger->log(
-            actor: $request->user(),
-            action: AuditAction::DoctorTimeOffDeleted,
-            auditable: $doctor,
-            metadata: [
-                'doctor_id' => $doctor->id,
-                'time_off_id' => $timeOffId,
-            ],
-            request: $request
-        );
+        $this->workflow->removeTimeOff($request->user(), $doctor, $timeOff, $request);
 
         return response()->json([
             'message' => 'Doctor time off deleted successfully.',

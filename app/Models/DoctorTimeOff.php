@@ -5,7 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property Carbon $starts_at
+ * @property Carbon $ends_at
+ */
 class DoctorTimeOff extends Model
 {
     use HasFactory;
@@ -26,17 +31,11 @@ class DoctorTimeOff extends Model
         ];
     }
 
-    /**
-     * @return BelongsTo<Clinic, $this>
-     */
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
     }
 
-    /**
-     * @return BelongsTo<Doctor, $this>
-     */
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);

@@ -7,7 +7,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 
+/**
+ * Eloquent casts defined below return Carbon instances and an AppointmentStatus enum.
+ * These annotations make the runtime contract visible to static analysis and IDEs.
+ *
+ * @property Carbon $starts_at
+ * @property Carbon $ends_at
+ * @property AppointmentStatus $status
+ */
 class Appointment extends Model
 {
     use HasFactory;
@@ -36,9 +45,6 @@ class Appointment extends Model
         ];
     }
 
-    /**
-     * @return BelongsTo<Clinic, $this>
-     */
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
@@ -70,17 +76,11 @@ class Appointment extends Model
         return $this->status === AppointmentStatus::Completed;
     }
 
-    /**
-     * @return HasOne<TreatmentNote, $this>
-     */
     public function treatmentNote(): HasOne
     {
         return $this->hasOne(TreatmentNote::class);
     }
 
-    /**
-     * @return HasOne<Invoice, $this>
-     */
     public function invoice(): HasOne
     {
         return $this->hasOne(Invoice::class);
